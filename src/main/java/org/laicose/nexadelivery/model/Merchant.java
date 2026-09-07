@@ -13,10 +13,9 @@ import java.util.List;
 @NoArgsConstructor
 public class Merchant extends User {
 
-    @Enumerated(EnumType.STRING)
     private String collectionAddress;
 
 
-    @OneToMany
+    @OneToMany(mappedBy = "merchant")
     private List<Delivery> deliveries;
 }

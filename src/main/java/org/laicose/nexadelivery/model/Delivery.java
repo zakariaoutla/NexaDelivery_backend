@@ -21,8 +21,9 @@ public class Delivery {
     private String pickupAddress;
     private String dropAddress;
     private String description;
+    @Enumerated(EnumType.STRING)
     private DeliveryStatus deliveryStatus;
-    private String tarckingCode;
+    private String trackingCode;;
     private String clientName;
     private String clientPhone;
     private LocalDateTime createdAt;
@@ -32,8 +33,9 @@ public class Delivery {
     private Driver driver;
 
     @ManyToOne
-    @JoinColumn(name = "merchent_id")
+    @JoinColumn(name = "merchant_id")
     private Merchant merchant;
 
-
+    @OneToOne(mappedBy = "delivery")
+    private Rating rating;
 }

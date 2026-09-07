@@ -15,7 +15,9 @@ import java.util.List;
 public class Driver extends User {
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "driver_status")
     private DriverStatus driverStatus;
+    @Column(name = "average_rating")
     private double averageRating;
 
 

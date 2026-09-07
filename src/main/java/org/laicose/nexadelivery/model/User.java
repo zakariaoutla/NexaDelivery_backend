@@ -1,9 +1,6 @@
 package org.laicose.nexadelivery.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,6 +12,8 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
+@Table(name = "users")
+@Inheritance(strategy = InheritanceType.JOINED)
 public class User {
 
     @Id
@@ -24,6 +23,9 @@ public class User {
     private String name;
     private String password;
     private String telephone;
+    @Column(name = "role_user")
+    @Enumerated(EnumType.STRING)
     private Role role;
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 }
