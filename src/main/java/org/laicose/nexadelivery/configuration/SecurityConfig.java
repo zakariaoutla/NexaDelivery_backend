@@ -1,5 +1,6 @@
 package org.laicose.nexadelivery.configuration;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,7 +31,34 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .addFilterBefore(jwtAuthFilter,
-                        UsernamePasswordAuthenticationFilter.class);
+                        UsernamePasswordAuthenticationFilter.class)
+
+                .exceptionHandling(exception -> exception
+
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json");
+
+                    response.getWriter().write("""
+            {
+              "status": 401,
+              "message": "Unauthorized"
+            }
+        """);
+                })
+
+                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    response.setContentType("application/json");
+
+                    response.getWriter().write("""
+            {
+              "status": 403,
+              "message": "Access Denied"
+            }
+        """);
+                })
+        );
         return http.build();
     }
     @Bean

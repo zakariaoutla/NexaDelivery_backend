@@ -1,17 +1,13 @@
 package org.laicose.nexadelivery.dto.request;
 
-
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-import org.laicose.nexadelivery.Enum.Role;
 
 @Getter
 @Setter
-public class UserRegister {
-
+public class MerchantRegister {
     @NotBlank(message = "Le nom est obligatoire")
     private String name;
     @Email
@@ -21,6 +17,7 @@ public class UserRegister {
     private String password;
     @NotBlank(message = "telephone est obligatoire")
     private String telephone;
-    @NotNull(message = "Le rôle est obligatoire")
-    private Role role;
+    @NotBlank(message = "Collection Address est obligatoire")
+    private String collectionAddress;
+
 }

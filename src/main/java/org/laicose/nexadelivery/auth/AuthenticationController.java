@@ -2,11 +2,16 @@ package org.laicose.nexadelivery.auth;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.laicose.nexadelivery.Enum.DriverStatus;
+import org.laicose.nexadelivery.Enum.Role;
 import org.laicose.nexadelivery.configuration.JwtUtil;
+import org.laicose.nexadelivery.dto.request.MerchantRegister;
 import org.laicose.nexadelivery.dto.request.UserLogin;
-import org.laicose.nexadelivery.dto.request.UserRegister;
-import org.laicose.nexadelivery.model.User;
-import org.laicose.nexadelivery.repository.UserRepository;
+import org.laicose.nexadelivery.dto.request.DriverRegister;
+import org.laicose.nexadelivery.model.Driver;
+import org.laicose.nexadelivery.model.Merchant;
+import org.laicose.nexadelivery.repository.DriverRepository;
+import org.laicose.nexadelivery.repository.MerchantRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,7 +31,8 @@ public class AuthenticationController {
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
-    private final UserRepository userRepository;
+    private final DriverRepository driverRepository;
+    private final MerchantRepository merchantRepository;
 
 
     @PostMapping("/login")
@@ -41,18 +47,38 @@ public class AuthenticationController {
     }
 
 
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody @Valid UserRegister request) {
-        User user = new User();
+    @PostMapping("/register/driver")
+    public ResponseEntity<?> registerDriver(@RequestBody @Valid DriverRegister request) {
+            Driver driver = new Driver();
+            driver.setEmail(request.getEmail());
+            driver.setName(request.getName());
+            driver.setTelephone(request.getTelephone());
+            driver.setPassword(passwordEncoder.encode(request.getPassword()));
+            driver.setRole(Role.DRIVER);
+            driver.setCreatedAt(LocalDateTime.now());
+            driver.setDriverStatus(DriverStatus.DISPONIBLE);
 
-        user.setEmail(request.getEmail());
-        user.setName(request.getName());
-        user.setTelephone(request.getTelephone());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole(request.getRole());
-        user.setCreatedAt(LocalDateTime.now());
-        userRepository.save(user);
+            driver.setAverageRating(0.0);
+
+            driverRepository.save(driver);
 
         return ResponseEntity.ok("User registered successfully");
     }
+
+    @PostMapping("/register/merchant")
+    public ResponseEntity<?> registerMerchant(@RequestBody @Valid MerchantRegister request) {
+        Merchant merchant = new Merchant();
+        merchant.setEmail(request.getEmail());
+        merchant.setName(request.getName());
+        merchant.setTelephone(request.getTelephone());
+        merchant.setPassword(passwordEncoder.encode(request.getPassword()));
+        merchant.setRole(Role.MERCHANT);
+        merchant.setCreatedAt(LocalDateTime.now());
+        merchant.setCollectionAddress(request.getCollectionAddress());
+        merchantRepository.save(merchant);
+
+        return ResponseEntity.ok("User registered successfully");
+    }
+
+
 }

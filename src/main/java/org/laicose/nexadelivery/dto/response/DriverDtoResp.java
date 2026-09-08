@@ -10,4 +10,6 @@ public class DriverDtoResp {
 
     private DriverStatus driverStatus;
     private double averageRating;
+    private long vehicleId;
+    private long zoneId;
 }
