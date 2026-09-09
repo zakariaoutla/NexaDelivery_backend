@@ -17,13 +17,14 @@ public class Delivery {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
     private String pickupAddress;
     private String dropAddress;
     private String description;
     @Enumerated(EnumType.STRING)
     private DeliveryStatus deliveryStatus;
-    private String trackingCode;;
+    @Column(unique = true)
+    private String trackingCode;
     private String clientName;
     private String clientPhone;
     private LocalDateTime createdAt;

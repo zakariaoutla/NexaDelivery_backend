@@ -10,13 +10,15 @@ import java.time.LocalDateTime;
 @Setter
 public class DeliveryDtoResp {
 
-    private long id;
+    private Long id;
     private String pickupAddress;
     private String dropAddress;
     private String description;
     private DeliveryStatus deliveryStatus;
-    private String trackingCode;;
+    private String trackingCode;
     private String clientName;
     private String clientPhone;
     private LocalDateTime createdAt;
+    private Long driverId;
+    private Long merchantId;
 }
