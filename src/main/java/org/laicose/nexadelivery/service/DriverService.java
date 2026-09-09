@@ -1,59 +1,71 @@
 package org.laicose.nexadelivery.service;
 
+import lombok.RequiredArgsConstructor;
 import org.laicose.nexadelivery.dto.request.DriverDtoReq;
 import org.laicose.nexadelivery.dto.request.DriverRegister;
+import org.laicose.nexadelivery.dto.request.DriverUpdateReq;
 import org.laicose.nexadelivery.dto.response.DriverDtoResp;
 import org.laicose.nexadelivery.mapper.DriverMapper;
 import org.laicose.nexadelivery.model.Driver;
+import org.laicose.nexadelivery.model.Vehicle;
+import org.laicose.nexadelivery.model.Zone;
 import org.laicose.nexadelivery.repository.DriverRepository;
+import org.laicose.nexadelivery.repository.VehicleRepository;
+import org.laicose.nexadelivery.repository.ZoneRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.config.SpringDataWebSettings;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class DriverService {
 
     private final DriverRepository driverRepository;
     private final DriverMapper driverMapper;
-    private final PasswordEncoder passwordEncoder;
+    private final VehicleRepository vehicleRepository;
+    private final ZoneRepository zoneRepository;
+    private final SpringDataWebSettings springDataWebSettings;
 
-    public DriverService(DriverRepository driverRepository, DriverMapper driverMapper, PasswordEncoder passwordEncoder){
-        this.driverRepository = driverRepository;
-        this.driverMapper = driverMapper;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     public Page<DriverDtoResp> getAllDriver(Pageable pageable){
         Page<Driver> drivers = driverRepository.findAll(pageable);
         return drivers.map(driverMapper::toResponseDto);
     }
 
-    public DriverDtoResp getDriverById(long id){
-        Driver driver = driverRepository.findById(id).orElseThrow(()->new RuntimeException("Client avec l'ID " + id + " est introuvable"));
+    public DriverDtoResp getDriverById(Long id){
+        Driver driver = driverRepository.findById(id).orElseThrow(()->new RuntimeException("Driver avec l'ID " + id + " est introuvable"));
         return driverMapper.toResponseDto(driver);
     }
 
-    public DriverDtoResp updateDriver(long id, DriverRegister driverRegister){
-        Driver driver = driverRepository.findById(id).orElseThrow(()->new RuntimeException("Client avec l'ID " + id + " est introuvable"));
-        driver.setName(driverRegister.getName());
-        driver.setEmail(driverRegister.getEmail());
-        driver.setTelephone(driverRegister.getTelephone());
-        driver.setPassword(passwordEncoder.encode(driverRegister.getPassword()));
+    public DriverDtoResp updateDriver(Long id, DriverUpdateReq driverUpdateReq){
 
-        Driver driverUpdate = driverRepository.save(driver);
-        return driverMapper.toResponseDto(driverUpdate);
+        Driver driver = driverRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Driver avec l'ID " + id + " est introuvable"
+                        )
+                );
+
+        driver.setName(driverUpdateReq.getName());
+        driver.setEmail(driverUpdateReq.getEmail());
+        driver.setTelephone(driverUpdateReq.getTelephone());
+
+        Driver updatedDriver = driverRepository.save(driver);
+
+        return driverMapper.toResponseDto(updatedDriver);
     }
 
-    public DriverDtoResp updateDriverStatus(long id, DriverDtoReq driverDtoReq){
-        Driver driver = driverRepository.findById(id).orElseThrow(()->new RuntimeException("Client avec l'ID " + id + " est introuvable"));
+    public DriverDtoResp updateDriverStatus(Long id, DriverDtoReq driverDtoReq){
+        Driver driver = driverRepository.findById(id).orElseThrow(()->new RuntimeException("Driver avec l'ID " + id + " est introuvable"));
 
         driver.setDriverStatus(driverDtoReq.getDriverStatus());
         Driver updateDriver = driverRepository.save(driver);
         return driverMapper.toResponseDto(updateDriver);
     }
 
-    public void deleteDriver(long id){
+    public void deleteDriver(Long id){
         Driver driver = driverRepository.findById(id)
                 .orElseThrow(() ->
                         new RuntimeException(
@@ -61,6 +73,38 @@ public class DriverService {
                         )
                 );
         driverRepository.delete(driver);
+    }
+
+    public DriverDtoResp assignVehicleToDriver(Long driverId, Long vehicleId){
+        Driver driver = driverRepository.findById(driverId).orElseThrow(()-> new RuntimeException("Driver avec l'ID " + driverId + " est introuvable"));
+        Vehicle vehicle = vehicleRepository.findById(vehicleId).orElseThrow(()-> new RuntimeException("Vehicle avec l'ID " + vehicleId + " est introuvable"));
+        if (vehicle.getDriver() != null) {
+            throw new RuntimeException(
+                    "Ce véhicule est déjà affecté à un driver"
+            );
+        }
+        if (driver.getVehicle() != null) {
+            throw new RuntimeException(
+                    "Ce driver possède déjà un véhicule"
+            );
+        }
+
+        driver.setVehicle(vehicle);
+
+        Driver updatedDriver = driverRepository.save(driver);
+
+        return driverMapper.toResponseDto(updatedDriver);
+
+    }
+
+    public DriverDtoResp assignZoneToDriver(Long driverId, Long zoneId){
+        Driver driver = driverRepository.findById(driverId).orElseThrow(()-> new RuntimeException("Driver avec l'ID " + driverId + " est introuvable"));
+        Zone zone = zoneRepository.findById(zoneId).orElseThrow(()-> new RuntimeException("Zone avec l'ID " + zoneId + " est introuvable"));
+
+        driver.setZone(zone);
+
+        Driver savedDriver = driverRepository.save(driver);
+        return driverMapper.toResponseDto(savedDriver);
     }
 
 

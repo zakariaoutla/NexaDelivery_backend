@@ -21,7 +21,7 @@ public class DriverRegister {
     @NotBlank(message = "telephone est obligatoire")
     private String telephone;
     @NotNull(message = "Vehicle est obligatoire")
-    private long vehicleId;
+    private Long vehicleId;
     @NotNull(message = "zone est obligatoir")
-    private long zoneId;
+    private Long zoneId;
 }

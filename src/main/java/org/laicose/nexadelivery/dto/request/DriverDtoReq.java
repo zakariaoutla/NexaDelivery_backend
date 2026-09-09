@@ -11,6 +11,4 @@ import org.laicose.nexadelivery.Enum.DriverStatus;
 public class DriverDtoReq {
     @NotNull(message = "Driver Status est obligatoire")
     private DriverStatus driverStatus;
-    @NotBlank(message = "Average Rating est obligatoire")
-    private double averageRating;
 }

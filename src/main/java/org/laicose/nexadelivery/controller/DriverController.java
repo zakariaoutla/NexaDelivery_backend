@@ -2,6 +2,7 @@ package org.laicose.nexadelivery.controller;
 
 import org.laicose.nexadelivery.dto.request.DriverDtoReq;
 import org.laicose.nexadelivery.dto.request.DriverRegister;
+import org.laicose.nexadelivery.dto.request.DriverUpdateReq;
 import org.laicose.nexadelivery.dto.response.DriverDtoResp;
 import org.laicose.nexadelivery.service.DriverService;
 import org.springframework.data.domain.Page;
@@ -36,8 +37,8 @@ public class DriverController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN')")
-    public ResponseEntity<DriverDtoResp> updateDriver(@PathVariable long id, @RequestBody DriverRegister driverRegister){
-        return ResponseEntity.ok(driverService.updateDriver(id, driverRegister));
+    public ResponseEntity<DriverDtoResp> updateDriver(@PathVariable long id, @RequestBody DriverUpdateReq driverUpdateReq){
+        return ResponseEntity.ok(driverService.updateDriver(id, driverUpdateReq));
     }
 
     @PutMapping("/{id}/status")

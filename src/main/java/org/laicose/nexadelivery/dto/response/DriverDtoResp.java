@@ -14,7 +14,7 @@ public class DriverDtoResp {
     private String telephone;
     private DriverStatus driverStatus;
     private double averageRating;
-    private long vehicleId;
-    private long zoneId;
+    private Long vehicleId;
+    private Long zoneId;
 
 }

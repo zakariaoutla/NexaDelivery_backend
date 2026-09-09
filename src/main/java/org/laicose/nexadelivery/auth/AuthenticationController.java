@@ -48,21 +48,24 @@ public class AuthenticationController {
 
 
     @PostMapping("/register/driver")
-    public ResponseEntity<?> registerDriver(@RequestBody @Valid DriverRegister request) {
-            Driver driver = new Driver();
-            driver.setEmail(request.getEmail());
-            driver.setName(request.getName());
-            driver.setTelephone(request.getTelephone());
-            driver.setPassword(passwordEncoder.encode(request.getPassword()));
-            driver.setRole(Role.DRIVER);
-            driver.setCreatedAt(LocalDateTime.now());
-            driver.setDriverStatus(DriverStatus.DISPONIBLE);
+    public ResponseEntity<?> registerDriver(
+            @RequestBody @Valid DriverRegister request) {
 
-            driver.setAverageRating(0.0);
+        Driver driver = new Driver();
 
-            driverRepository.save(driver);
+        driver.setEmail(request.getEmail());
+        driver.setName(request.getName());
+        driver.setTelephone(request.getTelephone());
+        driver.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        return ResponseEntity.ok("User registered successfully");
+        driver.setRole(Role.DRIVER);
+        driver.setCreatedAt(LocalDateTime.now());
+        driver.setDriverStatus(DriverStatus.DISPONIBLE);
+        driver.setAverageRating(0.0);
+
+        driverRepository.save(driver);
+
+        return ResponseEntity.ok("Driver registered successfully");
     }
 
     @PostMapping("/register/merchant")

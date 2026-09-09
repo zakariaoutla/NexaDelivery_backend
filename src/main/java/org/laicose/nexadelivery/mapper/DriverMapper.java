@@ -11,16 +11,14 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface DriverMapper {
 
-    @Mapping(source = "vehicleId", target = "vehicle.id")
-    @Mapping(source = "zoneId", target = "zone.id")
-    Driver toEntityDto(DriverRegister driverDtoReq);
+    @Mapping(target = "vehicle", ignore = true)
+    @Mapping(target = "zone", ignore = true)
+    @Mapping(target = "deliveries", ignore = true)
+    @Mapping(target = "averageRating", ignore = true)
+    Driver toEntityDto(DriverRegister driverRegister);
 
     @Mapping(source = "vehicle.id", target = "vehicleId")
     @Mapping(source = "zone.id", target = "zoneId")
-    @Mapping(target = "id", source = "id")
-    @Mapping(target = "name", source = "name")
-    @Mapping(target = "email", source = "email")
-    @Mapping(target = "telephone", source = "telephone")
     DriverDtoResp toResponseDto(Driver driver);
 
     List<DriverDtoResp> toListDto(List<Driver> drivers);
