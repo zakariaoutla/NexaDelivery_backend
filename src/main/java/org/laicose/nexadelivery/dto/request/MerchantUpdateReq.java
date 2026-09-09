@@ -7,17 +7,14 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class MerchantRegister {
+public class MerchantUpdateReq {
     @NotBlank(message = "Le nom est obligatoire")
     private String name;
     @Email(message = "Format email invalide")
     @NotBlank(message = "email est obligatoire")
     private String email;
-    @NotBlank(message = "password est obligatoire")
-    private String password;
     @NotBlank(message = "telephone est obligatoire")
     private String telephone;
     @NotBlank(message = "Collection Address est obligatoire")
     private String collectionAddress;
-
 }

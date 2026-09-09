@@ -11,12 +11,9 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface MerchantMapper {
 
+    @Mapping(target = "deliveries", ignore = true)
     Merchant toEntityDto(MerchantRegister merchantRegister);
 
-    @Mapping(target = "id", source = "id")
-    @Mapping(target = "name", source = "name")
-    @Mapping(target = "email", source = "email")
-    @Mapping(target = "telephone", source = "telephone")
     MerchantDtoResp toResponseDto(Merchant merchant);
     List<MerchantDtoResp> toListDto(List<Merchant> merchants);
 }

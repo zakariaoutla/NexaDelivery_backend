@@ -1,8 +1,9 @@
 package org.laicose.nexadelivery.controller;
 
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.laicose.nexadelivery.dto.request.MerchantUpdateRequest;
+import org.laicose.nexadelivery.dto.request.MerchantUpdateReq;
 import org.laicose.nexadelivery.dto.response.MerchantDtoResp;
 import org.laicose.nexadelivery.service.MerchantService;
 import org.springframework.data.domain.Page;
@@ -14,7 +15,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.PublicKey;
 
 @RestController
 @RequestMapping("/api/merchant")
@@ -24,27 +24,38 @@ public class MerchantController {
     private final MerchantService merchantService;
 
 
-    @GetMapping()
-    @PreAuthorize("hasAnyRole('ADMIN')")
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<MerchantDtoResp>> findAllMerchant(@PageableDefault(page = 0,size = 10, direction = Sort.Direction.ASC)Pageable pageable){
         return ResponseEntity.ok(merchantService.getAllMerchant(pageable));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN')")
-    public ResponseEntity<MerchantDtoResp> findMerchantById(@PathVariable long id){
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<MerchantDtoResp> findMerchantById(@PathVariable Long id){
         return ResponseEntity.ok(merchantService.getMerchantById(id));
+    }
+    @GetMapping("/me")
+    @PreAuthorize("hasRole('MERCHANT')")
+    public ResponseEntity<MerchantDtoResp> myProfile(Authentication authentication){
+        return ResponseEntity.ok(merchantService.getMyProfile(authentication.getName()));
+    }
+
+    @PutMapping("/me")
+    @PreAuthorize("hasRole('MERCHANT')")
+    public ResponseEntity<MerchantDtoResp> updateMyProfile(Authentication authentication, @Valid @RequestBody MerchantUpdateReq merchantUpdateReq){
+        return ResponseEntity.ok(merchantService.updateMyProfile(authentication.getName(), merchantUpdateReq));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN')")
-    public ResponseEntity<MerchantDtoResp> updateMerchant(@PathVariable long id, @RequestBody MerchantUpdateRequest merchantUpdateRequest){
-        return ResponseEntity.ok(merchantService.updateMerchant(id, merchantUpdateRequest));
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<MerchantDtoResp> updateMerchant(@PathVariable Long id,@Valid @RequestBody MerchantUpdateReq merchantUpdateReq){
+        return ResponseEntity.ok(merchantService.updateMerchant(id, merchantUpdateReq));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN')")
-    public ResponseEntity<MerchantDtoResp> deletMerchant(@PathVariable long id){
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteMerchant(@PathVariable Long id){
         merchantService.deleteMerchant(id);
 
         return ResponseEntity.noContent().build();

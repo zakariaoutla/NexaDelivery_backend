@@ -65,6 +65,22 @@ public class DriverService {
         return driverMapper.toResponseDto(updateDriver);
     }
 
+    public DriverDtoResp updateMyStatus(
+            String email,
+            DriverDtoReq request) {
+
+        Driver driver = driverRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new RuntimeException("Driver introuvable")
+                );
+
+        driver.setDriverStatus(request.getDriverStatus());
+
+        Driver updatedDriver = driverRepository.save(driver);
+
+        return driverMapper.toResponseDto(updatedDriver);
+    }
+
     public void deleteDriver(Long id){
         Driver driver = driverRepository.findById(id)
                 .orElseThrow(() ->

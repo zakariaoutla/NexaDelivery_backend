@@ -12,6 +12,7 @@ import org.laicose.nexadelivery.model.Driver;
 import org.laicose.nexadelivery.model.Merchant;
 import org.laicose.nexadelivery.repository.DriverRepository;
 import org.laicose.nexadelivery.repository.MerchantRepository;
+import org.laicose.nexadelivery.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -33,6 +34,7 @@ public class AuthenticationController {
     private final PasswordEncoder passwordEncoder;
     private final DriverRepository driverRepository;
     private final MerchantRepository merchantRepository;
+    private final UserRepository userRepository;
 
 
     @PostMapping("/login")
@@ -63,6 +65,10 @@ public class AuthenticationController {
         driver.setDriverStatus(DriverStatus.DISPONIBLE);
         driver.setAverageRating(0.0);
 
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Cet email est déjà utilisé");
+        }
+
         driverRepository.save(driver);
 
         return ResponseEntity.ok("Driver registered successfully");
@@ -78,6 +84,11 @@ public class AuthenticationController {
         merchant.setRole(Role.MERCHANT);
         merchant.setCreatedAt(LocalDateTime.now());
         merchant.setCollectionAddress(request.getCollectionAddress());
+
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Cet email est déjà utilisé");
+        }
+
         merchantRepository.save(merchant);
 
         return ResponseEntity.ok("User registered successfully");
