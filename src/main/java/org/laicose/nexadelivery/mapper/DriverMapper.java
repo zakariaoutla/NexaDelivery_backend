@@ -17,6 +17,10 @@ public interface DriverMapper {
 
     @Mapping(source = "vehicle.id", target = "vehicleId")
     @Mapping(source = "zone.id", target = "zoneId")
+    @Mapping(target = "id", source = "id")
+    @Mapping(target = "name", source = "name")
+    @Mapping(target = "email", source = "email")
+    @Mapping(target = "telephone", source = "telephone")
     DriverDtoResp toResponseDto(Driver driver);
 
     List<DriverDtoResp> toListDto(List<Driver> drivers);
