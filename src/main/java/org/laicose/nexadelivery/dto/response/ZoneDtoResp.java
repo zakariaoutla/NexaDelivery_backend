@@ -6,7 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ZoneDtoResp {
-    private long id;
+    private Long id;
     private String name;
     private String description;
 }

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.laicose.nexadelivery.Enum.VehicleType;
 
 @Entity
 @Getter
@@ -13,9 +14,10 @@ public class Vehicle {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
-    private String type;
-    private double capacityKg;
+    private Long id;
+    @Enumerated(EnumType.STRING)
+    private VehicleType type;
+    private Double capacityKg;
 
     @OneToOne(mappedBy = "vehicle")
     private Driver driver;
