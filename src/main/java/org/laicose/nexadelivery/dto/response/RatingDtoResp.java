@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Setter
 public class RatingDtoResp {
 
-    private long id;
+    private Long id;
     private int score;
     private String comment;
     private LocalDateTime createdAt;

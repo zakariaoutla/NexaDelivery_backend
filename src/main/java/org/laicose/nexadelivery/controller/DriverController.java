@@ -13,6 +13,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -52,12 +54,12 @@ public class DriverController {
     @PutMapping("/me/status")
     @PreAuthorize("hasRole('DRIVER')")
     public ResponseEntity<DriverDtoResp> updateMyStatus(
-            Authentication authentication,
+            @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody DriverDtoReq request) {
 
         return ResponseEntity.ok(
                 driverService.updateMyStatus(
-                        authentication.getName(),
+                        userDetails.getUsername(),
                         request
                 )
         );

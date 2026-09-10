@@ -26,7 +26,6 @@ public class DriverService {
     private final DriverMapper driverMapper;
     private final VehicleRepository vehicleRepository;
     private final ZoneRepository zoneRepository;
-    private final SpringDataWebSettings springDataWebSettings;
 
 
     public Page<DriverDtoResp> getAllDriver(Pageable pageable){

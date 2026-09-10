@@ -1,10 +1,26 @@
 package org.laicose.nexadelivery.service;
 
 import lombok.RequiredArgsConstructor;
+import org.laicose.nexadelivery.Enum.DeliveryStatus;
+import org.laicose.nexadelivery.Enum.DriverStatus;
+import org.laicose.nexadelivery.dto.request.DeliveryDtoReq;
+import org.laicose.nexadelivery.dto.request.DeliveryStatusReq;
+import org.laicose.nexadelivery.dto.response.DeliveryDtoResp;
 import org.laicose.nexadelivery.mapper.DeliveryMapper;
+import org.laicose.nexadelivery.model.Delivery;
+import org.laicose.nexadelivery.model.Driver;
+import org.laicose.nexadelivery.model.Merchant;
+import org.laicose.nexadelivery.model.User;
 import org.laicose.nexadelivery.repository.DeliveryRepository;
+import org.laicose.nexadelivery.repository.DriverRepository;
+import org.laicose.nexadelivery.repository.MerchantRepository;
 import org.laicose.nexadelivery.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -12,7 +28,263 @@ public class DeliveryService {
 
     private final DeliveryRepository deliveryRepository;
     private final DeliveryMapper deliveryMapper;
-    private final UserRepository userRepository;
+    private final MerchantRepository merchantRepository;
+    private final DriverRepository driverRepository;
+
+
+    public Page<DeliveryDtoResp> findAllDelivery(Pageable pageable){
+        Page<Delivery> merchants = deliveryRepository.findAll(pageable);
+        return merchants.map(deliveryMapper::toResponseDto);
+    }
+    public DeliveryDtoResp findDeliveryById(Long id){
+        Delivery delivery = deliveryRepository.findById(id).orElseThrow(()->new RuntimeException("Merchant avec l'ID " + id + " est introuvable"));
+        return deliveryMapper.toResponseDto(delivery);
+    }
+
+    public DeliveryDtoResp createDelivery(String email,DeliveryDtoReq deliveryDtoReq){
+        Merchant merchant = merchantRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Merchant avec l'email " + email + " est introuvable"
+                        )
+                );
+
+        Delivery delivery = deliveryMapper.toEntityDto(deliveryDtoReq);
+        delivery.setMerchant(merchant);
+        delivery.setCreatedAt(LocalDateTime.now());
+        delivery.setTrackingCode("NX-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+        delivery.setDeliveryStatus(DeliveryStatus.EN_ATTENTE);
+        Delivery savedDelivery = deliveryRepository.save(delivery);
+        return deliveryMapper.toResponseDto(savedDelivery);
+    }
+
+    public DeliveryDtoResp updateDelivery(Long id, DeliveryDtoReq deliveryDtoReq){
+        Delivery delivery = deliveryRepository.findById(id).orElseThrow(()->new RuntimeException("Delivery avec l'ID " + id + " est introuvable"));
+
+        delivery.setClientName(deliveryDtoReq.getClientName());
+        delivery.setClientPhone(deliveryDtoReq.getClientPhone());
+        delivery.setDescription(deliveryDtoReq.getDescription());
+        delivery.setDropAddress(deliveryDtoReq.getDropAddress());
+        delivery.setPickupAddress(deliveryDtoReq.getPickupAddress());
+
+        Delivery updatedDelivery = deliveryRepository.save(delivery);
+
+        return deliveryMapper.toResponseDto(updatedDelivery);
+    }
+
+    public DeliveryDtoResp findByTrackingCode(String trackingCode){
+        Delivery delivery = deliveryRepository.findByTrackingCode(trackingCode).orElseThrow(()-> new RuntimeException("Delivery avec Tracking code " + trackingCode + " est introuvable"));
+         return deliveryMapper.toResponseDto(delivery);
+    }
+
+    public DeliveryDtoResp assignDriverToDelivery(Long driverId, Long deliveryId){
+        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(()-> new RuntimeException("Delivery avec l'ID " + deliveryId + " est introuvable"));
+        Driver driver = driverRepository.findById(driverId).orElseThrow(()->new RuntimeException("Driver avec l'ID " + driverId + " est introuvable"));
+
+        if (delivery.getDeliveryStatus() != DeliveryStatus.EN_ATTENTE) {
+            throw new RuntimeException(
+                    "Cette livraison n'est pas en attente"
+            );
+        }
+        if (driver.getDriverStatus() != DriverStatus.DISPONIBLE) {
+            throw new RuntimeException(
+                    "Ce driver n'est pas disponible"
+            );
+        }
+
+        delivery.setDriver(driver);
+        delivery.setDeliveryStatus(DeliveryStatus.ASSIGNEE);
+        driver.setDriverStatus(DriverStatus.EN_LIVRAISON);
+        driverRepository.save(driver);
+
+        Delivery saveddelivery = deliveryRepository.save(delivery);
+
+        return deliveryMapper.toResponseDto(saveddelivery);
+
+    }
+
+    public DeliveryDtoResp updateDeliveryStatus(Long deliveryId, DeliveryStatusReq request) {
+
+        Delivery delivery = deliveryRepository.findById(deliveryId)
+                .orElseThrow(() -> new RuntimeException(
+                        "Delivery avec l'ID " + deliveryId + " est introuvable"
+                ));
+
+        DeliveryStatus currentStatus = delivery.getDeliveryStatus();
+        DeliveryStatus newStatus = request.getDeliveryStatus();
+
+        boolean validTransition = switch (currentStatus) {
+
+            case EN_ATTENTE ->
+                    newStatus == DeliveryStatus.ANNULEE;
+
+            case ASSIGNEE ->
+                    newStatus == DeliveryStatus.RECUPEREE
+                            || newStatus == DeliveryStatus.ANNULEE;
+
+            case RECUPEREE ->
+                    newStatus == DeliveryStatus.EN_ROUTE;
+
+            case EN_ROUTE ->
+                    newStatus == DeliveryStatus.LIVREE;
+
+            case LIVREE, ANNULEE -> false;
+        };
+
+        if (!validTransition) {
+            throw new RuntimeException(
+                    "Transition de " + currentStatus +
+                            " vers " + newStatus +
+                            " non autorisée"
+            );
+        }
+
+        delivery.setDeliveryStatus(newStatus);
+
+        if (newStatus == DeliveryStatus.ANNULEE
+                || newStatus == DeliveryStatus.LIVREE) {
+
+            if (delivery.getDriver() != null) {
+                Driver driver = delivery.getDriver();
+                driver.setDriverStatus(DriverStatus.DISPONIBLE);
+                driverRepository.save(driver);
+            }
+        }
+
+        Delivery savedDelivery = deliveryRepository.save(delivery);
+
+        return deliveryMapper.toResponseDto(savedDelivery);
+    }
+
+    public Page<DeliveryDtoResp> getMyDeliveries(String email, Pageable pageable){
+        Merchant merchant = merchantRepository.findByEmail(email).orElseThrow(()->new RuntimeException("Merchant avec l'email " + email + " est introuvable"));
+        Page<Delivery> deliveries  = deliveryRepository.findByMerchant(merchant,pageable);
+        return deliveries.map(deliveryMapper::toResponseDto);
+    }
+
+    public Page<DeliveryDtoResp> getMyDriverDeliveries(String email, Pageable pageable){
+        Driver driver = driverRepository.findByEmail(email).orElseThrow(()->new RuntimeException("Driver avec l'email " + email + " est introuvable"));
+        Page<Delivery> deliveries = deliveryRepository.findByDriver(driver, pageable);
+        return deliveries.map(deliveryMapper::toResponseDto);
+    }
+
+    public DeliveryDtoResp updateMyDeliveryStatus(
+            String email,
+            Long deliveryId,
+            DeliveryStatus newStatus) {
+
+        Delivery delivery = deliveryRepository.findById(deliveryId)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Delivery avec l'ID " + deliveryId + " est introuvable"
+                        )
+                );
+
+        if (delivery.getDriver() == null) {
+            throw new RuntimeException(
+                    "Cette livraison n'est affectée à aucun driver"
+            );
+        }
+
+        if (!delivery.getDriver().getEmail().equals(email)) {
+            throw new RuntimeException(
+                    "Vous n'êtes pas autorisé à modifier cette livraison"
+            );
+        }
+
+        DeliveryStatus currentStatus = delivery.getDeliveryStatus();
+
+        boolean validTransition = switch (currentStatus) {
+
+            case ASSIGNEE ->
+                    newStatus == DeliveryStatus.RECUPEREE;
+
+            case RECUPEREE ->
+                    newStatus == DeliveryStatus.EN_ROUTE;
+
+            case EN_ROUTE ->
+                    newStatus == DeliveryStatus.LIVREE;
+
+            case EN_ATTENTE, LIVREE, ANNULEE -> false;
+        };
+
+        if (!validTransition) {
+            throw new RuntimeException(
+                    "Transition de " + currentStatus +
+                            " vers " + newStatus +
+                            " non autorisée"
+            );
+        }
+
+        delivery.setDeliveryStatus(newStatus);
+
+        if (newStatus == DeliveryStatus.LIVREE) {
+            Driver driver = delivery.getDriver();
+            driver.setDriverStatus(DriverStatus.DISPONIBLE);
+            driverRepository.save(driver);
+        }
+
+        Delivery savedDelivery = deliveryRepository.save(delivery);
+
+        return deliveryMapper.toResponseDto(savedDelivery);
+    }
+
+    public DeliveryDtoResp cancelMyDelivery(String email, Long deliveryId) {
+
+        Merchant merchant = merchantRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Merchant avec l'email " + email + " est introuvable"
+                        )
+                );
+
+        Delivery delivery = deliveryRepository.findById(deliveryId)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Delivery avec l'ID " + deliveryId + " est introuvable"
+                        )
+                );
+
+        if (delivery.getMerchant().getId()!=(merchant.getId())) {
+            throw new RuntimeException(
+                    "Vous n'êtes pas autorisé à annuler cette livraison"
+            );
+        }
+
+        if (delivery.getDeliveryStatus() != DeliveryStatus.EN_ATTENTE) {
+            throw new RuntimeException(
+                    "Cette livraison ne peut être annulée que si elle est en attente"
+            );
+        }
+
+        delivery.setDeliveryStatus(DeliveryStatus.ANNULEE);
+
+        Delivery savedDelivery = deliveryRepository.save(delivery);
+
+        return deliveryMapper.toResponseDto(savedDelivery);
+    }
+
+    public void deleteDelivery(Long id) {
+
+        Delivery delivery = deliveryRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Delivery avec l'ID " + id + " est introuvable"
+                        )
+                );
+
+        if (delivery.getDeliveryStatus() == DeliveryStatus.ANNULEE
+                || delivery.getDeliveryStatus() == DeliveryStatus.EN_ATTENTE) {
+
+            deliveryRepository.delete(delivery);
+
+        } else {
+            throw new RuntimeException(
+                    "Vous n'êtes pas autorisé à supprimer cette livraison"
+            );
+        }
+    }
+
 
 
 }

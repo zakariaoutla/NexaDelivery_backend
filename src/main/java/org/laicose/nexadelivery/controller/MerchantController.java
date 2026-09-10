@@ -13,6 +13,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -37,14 +39,14 @@ public class MerchantController {
     }
     @GetMapping("/me")
     @PreAuthorize("hasRole('MERCHANT')")
-    public ResponseEntity<MerchantDtoResp> myProfile(Authentication authentication){
-        return ResponseEntity.ok(merchantService.getMyProfile(authentication.getName()));
+    public ResponseEntity<MerchantDtoResp> myProfile(@AuthenticationPrincipal UserDetails userDetails){
+        return ResponseEntity.ok(merchantService.getMyProfile(userDetails.getUsername()));
     }
 
     @PutMapping("/me")
     @PreAuthorize("hasRole('MERCHANT')")
-    public ResponseEntity<MerchantDtoResp> updateMyProfile(Authentication authentication, @Valid @RequestBody MerchantUpdateReq merchantUpdateReq){
-        return ResponseEntity.ok(merchantService.updateMyProfile(authentication.getName(), merchantUpdateReq));
+    public ResponseEntity<MerchantDtoResp> updateMyProfile(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody MerchantUpdateReq merchantUpdateReq){
+        return ResponseEntity.ok(merchantService.updateMyProfile(userDetails.getUsername(), merchantUpdateReq));
     }
 
     @PutMapping("/{id}")
