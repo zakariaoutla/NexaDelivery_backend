@@ -10,7 +10,8 @@ import java.time.LocalDateTime;
 public class RatingDtoResp {
 
     private Long id;
-    private int score;
+    private Integer score;
     private String comment;
     private LocalDateTime createdAt;
+    private Long deliveryId;
 }

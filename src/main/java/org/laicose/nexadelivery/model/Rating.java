@@ -15,8 +15,8 @@ public class Rating {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
-    private int score;
+    private Long id;
+    private Integer score;
     private String comment;
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
