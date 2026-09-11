@@ -1,6 +1,7 @@
 package org.laicose.nexadelivery.controller;
 
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.laicose.nexadelivery.Enum.DeliveryStatus;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/delivery")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 public class DeliveryController {
 
     private final DeliveryService deliveryService;

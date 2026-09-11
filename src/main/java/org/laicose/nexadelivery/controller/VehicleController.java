@@ -1,5 +1,6 @@
 package org.laicose.nexadelivery.controller;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.laicose.nexadelivery.dto.request.VehicleDtoReq;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/vehicle")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 public class VehicleController {
 
     private final VehicleService vehicleService;

@@ -1,6 +1,7 @@
 package org.laicose.nexadelivery.controller;
 
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.laicose.nexadelivery.dto.request.MerchantUpdateReq;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/merchant")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 public class MerchantController {
 
     private final MerchantService merchantService;

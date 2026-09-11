@@ -1,6 +1,7 @@
 package org.laicose.nexadelivery.controller;
 
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.laicose.nexadelivery.dto.request.ZoneDtoReq;
@@ -17,12 +18,13 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/zone")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 public class ZoneController {
 
     private final ZoneService zoneService;
 
 
-    @GetMapping()
+    @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<ZoneDtoResp>> findAllZone(@PageableDefault(page = 0, size = 10, direction = Sort.Direction.ASC)Pageable pageable){
         return ResponseEntity.ok(zoneService.getAllZone(pageable));

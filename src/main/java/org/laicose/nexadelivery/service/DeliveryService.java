@@ -103,7 +103,9 @@ public class DeliveryService {
 
     }
 
-    public DeliveryDtoResp updateDeliveryStatus(Long deliveryId, DeliveryStatusReq request) {
+    public DeliveryDtoResp updateDeliveryStatus(
+            Long deliveryId,
+            DeliveryStatusReq request) {
 
         Delivery delivery = deliveryRepository.findById(deliveryId)
                 .orElseThrow(() -> new RuntimeException(
@@ -113,25 +115,7 @@ public class DeliveryService {
         DeliveryStatus currentStatus = delivery.getDeliveryStatus();
         DeliveryStatus newStatus = request.getDeliveryStatus();
 
-        boolean validTransition = switch (currentStatus) {
-
-            case EN_ATTENTE ->
-                    newStatus == DeliveryStatus.ANNULEE;
-
-            case ASSIGNEE ->
-                    newStatus == DeliveryStatus.RECUPEREE
-                            || newStatus == DeliveryStatus.ANNULEE;
-
-            case RECUPEREE ->
-                    newStatus == DeliveryStatus.EN_ROUTE;
-
-            case EN_ROUTE ->
-                    newStatus == DeliveryStatus.LIVREE;
-
-            case LIVREE, ANNULEE -> false;
-        };
-
-        if (!validTransition) {
+        if (!isValidTransition(currentStatus, newStatus)) {
             throw new RuntimeException(
                     "Transition de " + currentStatus +
                             " vers " + newStatus +
@@ -154,6 +138,30 @@ public class DeliveryService {
         Delivery savedDelivery = deliveryRepository.save(delivery);
 
         return deliveryMapper.toResponseDto(savedDelivery);
+    }
+
+
+    private boolean isValidTransition(
+            DeliveryStatus currentStatus,
+            DeliveryStatus newStatus) {
+
+        return switch (currentStatus) {
+
+            case EN_ATTENTE ->
+                    newStatus == DeliveryStatus.ANNULEE;
+
+            case ASSIGNEE ->
+                    newStatus == DeliveryStatus.RECUPEREE
+                            || newStatus == DeliveryStatus.ANNULEE;
+
+            case RECUPEREE ->
+                    newStatus == DeliveryStatus.EN_ROUTE;
+
+            case EN_ROUTE ->
+                    newStatus == DeliveryStatus.LIVREE;
+
+            case LIVREE, ANNULEE -> false;
+        };
     }
 
     public Page<DeliveryDtoResp> getMyDeliveries(String email, Pageable pageable){

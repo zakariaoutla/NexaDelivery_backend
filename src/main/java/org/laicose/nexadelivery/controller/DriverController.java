@@ -1,5 +1,6 @@
 package org.laicose.nexadelivery.controller;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.laicose.nexadelivery.dto.request.DriverDtoReq;
 import org.laicose.nexadelivery.dto.request.DriverRegister;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/driver")
+@SecurityRequirement(name = "bearerAuth")
 public class DriverController {
 
     private final DriverService driverService;
