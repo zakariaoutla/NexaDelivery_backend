@@ -32,6 +32,9 @@ public class Driver extends User {
 
     @OneToMany(mappedBy = "driver")
     private List<Delivery> deliveries;
+
+    @OneToMany(mappedBy = "driver")
+    private List<DriverLocation> locations;
 }
 
 
