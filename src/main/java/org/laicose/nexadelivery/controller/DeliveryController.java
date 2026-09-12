@@ -9,6 +9,7 @@ import org.laicose.nexadelivery.dto.request.DeliveryDtoReq;
 import org.laicose.nexadelivery.dto.request.DeliveryStatusReq;
 import org.laicose.nexadelivery.dto.response.DeliveryDtoResp;
 import org.laicose.nexadelivery.service.DeliveryService;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -29,7 +30,7 @@ public class DeliveryController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<DeliveryDtoResp>> getAllDelivery(@PageableDefault(page = 0, size = 10, direction = Sort.Direction.ASC)Pageable pageable){
+    public ResponseEntity<Page<DeliveryDtoResp>> getAllDelivery(@ParameterObject @PageableDefault(page = 0, size = 10, direction = Sort.Direction.ASC)Pageable pageable){
         return ResponseEntity.ok(deliveryService.findAllDelivery(pageable));
 
     }
@@ -62,7 +63,6 @@ public class DeliveryController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DeliveryDtoResp> assignDriverToDelivery(@PathVariable Long deliveryId, @PathVariable Long driverId){
         return ResponseEntity.ok(deliveryService.assignDriverToDelivery(driverId,deliveryId ));
-
     }
 
     @PutMapping("/{id}/status")
@@ -73,13 +73,13 @@ public class DeliveryController {
 
     @GetMapping("/my-deliveries")
     @PreAuthorize("hasRole('MERCHANT')")
-    public ResponseEntity<Page<DeliveryDtoResp>> getMyDeliveries(@AuthenticationPrincipal UserDetails userDetails, @PageableDefault(page = 0,size = 10,direction = Sort.Direction.ASC)Pageable pageable){
+    public ResponseEntity<Page<DeliveryDtoResp>> getMyDeliveries(@AuthenticationPrincipal UserDetails userDetails, @ParameterObject @PageableDefault(page = 0,size = 10,direction = Sort.Direction.ASC)Pageable pageable){
         return ResponseEntity.ok(deliveryService.getMyDeliveries(userDetails.getUsername(), pageable));
     }
 
     @GetMapping("/driver")
     @PreAuthorize("hasRole('DRIVER')")
-    public ResponseEntity<Page<DeliveryDtoResp>> getMyDriverDeliveries(@AuthenticationPrincipal UserDetails userDetails, @PageableDefault(page = 0, size = 10, direction = Sort.Direction.ASC)Pageable pageable){
+    public ResponseEntity<Page<DeliveryDtoResp>> getMyDriverDeliveries(@AuthenticationPrincipal UserDetails userDetails, @ParameterObject @PageableDefault(page = 0, size = 10, direction = Sort.Direction.ASC)Pageable pageable){
         return ResponseEntity.ok(deliveryService.getMyDriverDeliveries(userDetails.getUsername(), pageable));
     }
 

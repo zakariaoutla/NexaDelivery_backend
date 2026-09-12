@@ -11,6 +11,6 @@ public class MerchantDtoResp {
     private String name;
     private String email;
     private String telephone;
-    private String collectionAddress;
+    private String businessName;
 
 }

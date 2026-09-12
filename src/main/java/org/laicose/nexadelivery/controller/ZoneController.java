@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.laicose.nexadelivery.dto.request.ZoneDtoReq;
 import org.laicose.nexadelivery.dto.response.ZoneDtoResp;
 import org.laicose.nexadelivery.service.ZoneService;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -26,7 +27,7 @@ public class ZoneController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<ZoneDtoResp>> findAllZone(@PageableDefault(page = 0, size = 10, direction = Sort.Direction.ASC)Pageable pageable){
+    public ResponseEntity<Page<ZoneDtoResp>> findAllZone(@ParameterObject @PageableDefault(page = 0, size = 10, direction = Sort.Direction.ASC)Pageable pageable){
         return ResponseEntity.ok(zoneService.getAllZone(pageable));
     }
 

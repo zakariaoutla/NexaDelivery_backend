@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.laicose.nexadelivery.dto.request.MerchantUpdateReq;
 import org.laicose.nexadelivery.dto.response.MerchantDtoResp;
 import org.laicose.nexadelivery.service.MerchantService;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -30,7 +31,7 @@ public class MerchantController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<MerchantDtoResp>> findAllMerchant(@PageableDefault(page = 0,size = 10, direction = Sort.Direction.ASC)Pageable pageable){
+    public ResponseEntity<Page<MerchantDtoResp>> findAllMerchant(@ParameterObject @PageableDefault(page = 0,size = 10, direction = Sort.Direction.ASC)Pageable pageable){
         return ResponseEntity.ok(merchantService.getAllMerchant(pageable));
     }
 

@@ -15,6 +15,7 @@ public class MerchantUpdateReq {
     private String email;
     @NotBlank(message = "telephone est obligatoire")
     private String telephone;
-    @NotBlank(message = "Collection Address est obligatoire")
-    private String collectionAddress;
+    @NotBlank(message = "Le nom de l'entreprise est obligatoire")
+    private String businessName;
+
 }

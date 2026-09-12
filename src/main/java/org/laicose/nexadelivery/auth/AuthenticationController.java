@@ -76,6 +76,11 @@ public class AuthenticationController {
 
     @PostMapping("/register/merchant")
     public ResponseEntity<?> registerMerchant(@RequestBody @Valid MerchantRegister request) {
+
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Cet email est déjà utilisé");
+        }
+
         Merchant merchant = new Merchant();
         merchant.setEmail(request.getEmail());
         merchant.setName(request.getName());
@@ -83,11 +88,8 @@ public class AuthenticationController {
         merchant.setPassword(passwordEncoder.encode(request.getPassword()));
         merchant.setRole(Role.MERCHANT);
         merchant.setCreatedAt(LocalDateTime.now());
-        merchant.setCollectionAddress(request.getCollectionAddress());
+        merchant.setBusinessName(request.getBusinessName());
 
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Cet email est déjà utilisé");
-        }
 
         merchantRepository.save(merchant);
 

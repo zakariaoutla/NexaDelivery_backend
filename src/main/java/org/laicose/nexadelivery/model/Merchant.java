@@ -13,9 +13,11 @@ import java.util.List;
 @NoArgsConstructor
 public class Merchant extends User {
 
-    private String collectionAddress;
+    @Column(name = "business_name")
+    private String businessName;
 
-
+    @OneToMany(mappedBy = "merchant")
+    private List<CollectionPoint> collectionPoints;
     @OneToMany(mappedBy = "merchant")
     private List<Delivery> deliveries;
 }

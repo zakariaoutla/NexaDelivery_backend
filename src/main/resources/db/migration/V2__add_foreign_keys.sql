@@ -14,6 +14,7 @@ ALTER TABLE merchant
         FOREIGN KEY (id) REFERENCES users(id);
 
 
+
 ALTER TABLE delivery
     ADD CONSTRAINT fk_delivery_driver
         FOREIGN KEY (driver_id) REFERENCES driver(id),
@@ -25,3 +26,15 @@ ALTER TABLE delivery
 ALTER TABLE rating
     ADD CONSTRAINT fk_rating_delivery
         FOREIGN KEY (delivery_id) REFERENCES delivery(id);
+
+ALTER TABLE collection_point
+    ADD CONSTRAINT fk_collection_point_merchant
+        FOREIGN KEY (merchant_id) REFERENCES merchant(id),
+
+    ADD CONSTRAINT fk_collection_point_zone
+        FOREIGN KEY (zone_id) REFERENCES zone(id);
+
+
+ALTER TABLE driver_location
+    ADD CONSTRAINT fk_driver_location_driver
+        FOREIGN KEY (driver_id) REFERENCES driver(id);

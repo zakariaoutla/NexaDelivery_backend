@@ -7,6 +7,7 @@ import org.laicose.nexadelivery.dto.request.DriverRegister;
 import org.laicose.nexadelivery.dto.request.DriverUpdateReq;
 import org.laicose.nexadelivery.dto.response.DriverDtoResp;
 import org.laicose.nexadelivery.service.DriverService;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -31,7 +32,7 @@ public class DriverController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<DriverDtoResp>> findAllDriver(@PageableDefault(page = 0, size = 10, direction = Sort.Direction.ASC)Pageable pageable){
+    public ResponseEntity<Page<DriverDtoResp>> findAllDriver(@ParameterObject @PageableDefault(page = 0, size = 10, direction = Sort.Direction.ASC)Pageable pageable){
         return ResponseEntity.ok(driverService.getAllDriver(pageable));
 
     }

@@ -17,7 +17,7 @@ CREATE TABLE driver (
 
 CREATE TABLE merchant (
                           id BIGINT PRIMARY KEY,
-                          collection_address VARCHAR(255) NOT NULL
+                          business_name VARCHAR(255) NOT NULL
 );
 CREATE TABLE rating (
                         id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -51,5 +51,22 @@ CREATE TABLE delivery (
                           created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                           driver_id BIGINT,
                           merchant_id BIGINT
+);
+
+CREATE TABLE collection_point (
+                                  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                  address VARCHAR(255) NOT NULL,
+                                  latitude DOUBLE NOT NULL,
+                                  longitude DOUBLE NOT NULL,
+                                  merchant_id BIGINT NOT NULL,
+                                  zone_id BIGINT NOT NULL
+);
+
+CREATE TABLE driver_location (
+                                 id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                 latitude DOUBLE NOT NULL,
+                                 longitude DOUBLE NOT NULL,
+                                 timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                                 driver_id BIGINT NOT NULL
 );
 

@@ -47,7 +47,7 @@ public class MerchantService {
         merchant.setName(request.getName());
         merchant.setEmail(request.getEmail());
         merchant.setTelephone(request.getTelephone());
-        merchant.setCollectionAddress(request.getCollectionAddress());
+        merchant.setBusinessName(request.getBusinessName());
 
         Merchant updatedMerchant = merchantRepository.save(merchant);
 
@@ -93,6 +93,12 @@ public class MerchantService {
                 );
         if(merchant.getDeliveries()!=null && !merchant.getDeliveries().isEmpty()){
             throw new RuntimeException("Impossible de supprimer ce merchant car il possède des livraisons");
+        }
+        if (merchant.getCollectionPoints() != null
+                && !merchant.getCollectionPoints().isEmpty()) {
+            throw new RuntimeException(
+                    "Impossible de supprimer ce merchant car il possède des points de collecte"
+            );
         }
 
         merchantRepository.delete(merchant);

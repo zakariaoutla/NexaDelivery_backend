@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.laicose.nexadelivery.dto.request.RatingDtoReq;
 import org.laicose.nexadelivery.dto.response.RatingDtoResp;
 import org.laicose.nexadelivery.service.RatingService;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -32,7 +33,7 @@ public class RatingController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'MERCHANT')")
-    public ResponseEntity<Page<RatingDtoResp>> getAllRating(@PageableDefault(page = 0,size = 10,direction = Sort.Direction.ASC)Pageable pageable){
+    public ResponseEntity<Page<RatingDtoResp>> getAllRating(@ParameterObject @PageableDefault(page = 0,size = 10,direction = Sort.Direction.ASC)Pageable pageable){
         return ResponseEntity.ok(ratingService.findAllRating(pageable));
     }
 

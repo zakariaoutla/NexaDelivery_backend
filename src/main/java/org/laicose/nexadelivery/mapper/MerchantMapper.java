@@ -12,6 +12,7 @@ import java.util.List;
 public interface MerchantMapper {
 
     @Mapping(target = "deliveries", ignore = true)
+    @Mapping(target = "collectionPoints", ignore = true)
     Merchant toEntityDto(MerchantRegister merchantRegister);
 
     MerchantDtoResp toResponseDto(Merchant merchant);

@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.laicose.nexadelivery.dto.request.VehicleDtoReq;
 import org.laicose.nexadelivery.dto.response.VehicleDtoResp;
 import org.laicose.nexadelivery.service.VehicleService;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -24,7 +25,7 @@ public class VehicleController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<VehicleDtoResp>> getAllVehicle(@PageableDefault(page = 0, size = 10, direction = Sort.Direction.ASC)Pageable pageable){
+    public ResponseEntity<Page<VehicleDtoResp>> getAllVehicle(@ParameterObject @PageableDefault(page = 0, size = 10, direction = Sort.Direction.ASC)Pageable pageable){
         return ResponseEntity.ok(vehicleService.getAllVehicle(pageable));
     }
 
