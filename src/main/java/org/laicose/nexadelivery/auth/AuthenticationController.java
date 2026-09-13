@@ -53,6 +53,10 @@ public class AuthenticationController {
     public ResponseEntity<?> registerDriver(
             @RequestBody @Valid DriverRegister request) {
 
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Cet email est déjà utilisé");
+        }
+
         Driver driver = new Driver();
 
         driver.setEmail(request.getEmail());
@@ -65,9 +69,7 @@ public class AuthenticationController {
         driver.setDriverStatus(DriverStatus.DISPONIBLE);
         driver.setAverageRating(0.0);
 
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Cet email est déjà utilisé");
-        }
+
 
         driverRepository.save(driver);
 
