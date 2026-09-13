@@ -1,0 +1,45 @@
+version: "3.7"
+
+services:
+  app:
+    build: .
+    container_name: nexa-delivery-app
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/nexadelivery_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Zakaria@741
+      SPRING_CACHE_TYPE: simple
+    networks:
+      - app_network
+
+
+
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: always
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_DATABASE: nexadelivery_db
+      MYSQL_ROOT_PASSWORD: Zakaria@741
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pZakaria@741"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+networks:
+  app_network:
+
+volumes:
+  db_data:
