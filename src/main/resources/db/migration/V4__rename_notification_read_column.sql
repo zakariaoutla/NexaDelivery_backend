@@ -1,0 +1,2 @@
+ALTER TABLE notifications
+    CHANGE COLUMN `read` is_read BOOLEAN NOT NULL DEFAULT FALSE;

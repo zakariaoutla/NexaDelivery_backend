@@ -29,6 +29,7 @@ public class DeliveryService {
     private final DriverRepository driverRepository;
     private final CollectionPointRepository collectionPointRepository;
     private final DriverLocationRepository driverLocationRepository;
+    private final NotificationService notificationService;
 
 
     public Page<DeliveryDtoResp> findAllDelivery(Pageable pageable){
@@ -86,6 +87,7 @@ public class DeliveryService {
          return deliveryMapper.toResponseDto(delivery);
     }
 
+    @Transactional
     public DeliveryDtoResp assignDriverToDelivery(Long driverId, Long deliveryId){
         Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(()-> new RuntimeException("Delivery avec l'ID " + deliveryId + " est introuvable"));
         Driver driver = driverRepository.findById(driverId).orElseThrow(()->new RuntimeException("Driver avec l'ID " + driverId + " est introuvable"));
@@ -108,10 +110,17 @@ public class DeliveryService {
 
         Delivery saveddelivery = deliveryRepository.save(delivery);
 
+        notificationService.createNotification(
+                driver,
+                delivery,
+                "Une nouvelle livraison vous a été assignée"
+        );
+
         return deliveryMapper.toResponseDto(saveddelivery);
 
     }
 
+    @Transactional
     public DeliveryDtoResp updateDeliveryStatus(
             Long deliveryId,
             DeliveryStatusReq request) {
@@ -145,6 +154,27 @@ public class DeliveryService {
         }
 
         Delivery savedDelivery = deliveryRepository.save(delivery);
+        String message = switch (newStatus) {
+            case RECUPEREE ->
+                    "Votre livraison a été récupérée par le chauffeur";
+
+            case EN_ROUTE ->
+                    "Votre livraison est maintenant en route";
+
+            case LIVREE ->
+                    "Votre livraison a été livrée avec succès";
+
+            default ->
+                    null;
+        };
+
+        if (message != null) {
+            notificationService.createNotification(
+                    delivery.getMerchant(),
+                    delivery,
+                    message
+            );
+        }
 
         return deliveryMapper.toResponseDto(savedDelivery);
     }
@@ -185,6 +215,7 @@ public class DeliveryService {
         return deliveries.map(deliveryMapper::toResponseDto);
     }
 
+    @Transactional
     public DeliveryDtoResp updateMyDeliveryStatus(
             String email,
             Long deliveryId,
@@ -243,6 +274,28 @@ public class DeliveryService {
         }
 
         Delivery savedDelivery = deliveryRepository.save(delivery);
+
+        String message = switch (newStatus) {
+            case RECUPEREE ->
+                    "Votre livraison a été récupérée par le chauffeur";
+
+            case EN_ROUTE ->
+                    "Votre livraison est maintenant en route";
+
+            case LIVREE ->
+                    "Votre livraison a été livrée avec succès";
+
+            default -> null;
+        };
+
+        if (message != null) {
+            notificationService.createNotification(
+                    savedDelivery.getMerchant(),
+                    savedDelivery,
+                    message
+            );
+        }
+
 
         return deliveryMapper.toResponseDto(savedDelivery);
     }
@@ -391,6 +444,12 @@ public class DeliveryService {
 
         Delivery savedDelivery =
                 deliveryRepository.save(delivery);
+
+        notificationService.createNotification(
+                nearestDriver,
+                savedDelivery,
+                "Une nouvelle livraison vous a été assignée"
+        );
 
         return deliveryMapper.toResponseDto(savedDelivery);
     }
