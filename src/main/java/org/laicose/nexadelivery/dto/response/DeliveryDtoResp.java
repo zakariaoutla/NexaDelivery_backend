@@ -21,4 +21,5 @@ public class DeliveryDtoResp {
     private LocalDateTime createdAt;
     private Long driverId;
     private Long merchantId;
+    private Long collectionPointId;
 }

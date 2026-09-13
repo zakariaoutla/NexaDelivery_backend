@@ -50,7 +50,9 @@ CREATE TABLE delivery (
                           client_phone VARCHAR(50) NOT NULL,
                           created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                           driver_id BIGINT,
-                          merchant_id BIGINT
+                          merchant_id BIGINT,
+                          collection_point_id BIGINT
+
 );
 
 CREATE TABLE collection_point (

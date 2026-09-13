@@ -24,4 +24,7 @@ public class DeliveryDtoReq {
 
     @NotBlank(message = "Client Phone est obligatoire")
     private String clientPhone;
+
+    @NotNull(message = "Le point de collecte est obligatoire")
+    private Long collectionPointId;
 }

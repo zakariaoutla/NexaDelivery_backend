@@ -7,19 +7,16 @@ import org.laicose.nexadelivery.dto.request.DeliveryDtoReq;
 import org.laicose.nexadelivery.dto.request.DeliveryStatusReq;
 import org.laicose.nexadelivery.dto.response.DeliveryDtoResp;
 import org.laicose.nexadelivery.mapper.DeliveryMapper;
-import org.laicose.nexadelivery.model.Delivery;
-import org.laicose.nexadelivery.model.Driver;
-import org.laicose.nexadelivery.model.Merchant;
-import org.laicose.nexadelivery.model.User;
-import org.laicose.nexadelivery.repository.DeliveryRepository;
-import org.laicose.nexadelivery.repository.DriverRepository;
-import org.laicose.nexadelivery.repository.MerchantRepository;
-import org.laicose.nexadelivery.repository.UserRepository;
+import org.laicose.nexadelivery.model.*;
+import org.laicose.nexadelivery.repository.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -30,6 +27,8 @@ public class DeliveryService {
     private final DeliveryMapper deliveryMapper;
     private final MerchantRepository merchantRepository;
     private final DriverRepository driverRepository;
+    private final CollectionPointRepository collectionPointRepository;
+    private final DriverLocationRepository driverLocationRepository;
 
 
     public Page<DeliveryDtoResp> findAllDelivery(Pageable pageable){
@@ -48,8 +47,18 @@ public class DeliveryService {
                                 "Merchant avec l'email " + email + " est introuvable"
                         )
                 );
-
+        CollectionPoint collectionPoint = collectionPointRepository
+                .findByIdAndMerchant(
+                        deliveryDtoReq.getCollectionPointId(),
+                        merchant
+                )
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Point de collecte introuvable pour ce merchant"
+                        )
+                );
         Delivery delivery = deliveryMapper.toEntityDto(deliveryDtoReq);
+        delivery.setCollectionPoint(collectionPoint);
         delivery.setMerchant(merchant);
         delivery.setCreatedAt(LocalDateTime.now());
         delivery.setTrackingCode("NX-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
@@ -179,7 +188,7 @@ public class DeliveryService {
     public DeliveryDtoResp updateMyDeliveryStatus(
             String email,
             Long deliveryId,
-            DeliveryStatus newStatus) {
+            DeliveryStatusReq request) {
 
         Delivery delivery = deliveryRepository.findById(deliveryId)
                 .orElseThrow(() ->
@@ -201,6 +210,7 @@ public class DeliveryService {
         }
 
         DeliveryStatus currentStatus = delivery.getDeliveryStatus();
+        DeliveryStatus newStatus = request.getDeliveryStatus();
 
         boolean validTransition = switch (currentStatus) {
 
@@ -268,6 +278,119 @@ public class DeliveryService {
         delivery.setDeliveryStatus(DeliveryStatus.ANNULEE);
 
         Delivery savedDelivery = deliveryRepository.save(delivery);
+
+        return deliveryMapper.toResponseDto(savedDelivery);
+    }
+
+    private double calculateDistance(
+            double lat1,
+            double lon1,
+            double lat2,
+            double lon2) {
+
+        final double EARTH_RADIUS = 6371.0;
+
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
+
+        double a =
+                Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                        + Math.cos(Math.toRadians(lat1))
+                        * Math.cos(Math.toRadians(lat2))
+                        * Math.sin(lonDistance / 2)
+                        * Math.sin(lonDistance / 2);
+
+        double c = 2 * Math.atan2(
+                Math.sqrt(a),
+                Math.sqrt(1 - a)
+        );
+
+        return EARTH_RADIUS * c;
+    }
+
+
+
+    @Transactional
+    public DeliveryDtoResp autoAssignDriver(Long deliveryId) {
+
+        Delivery delivery = deliveryRepository.findById(deliveryId)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Delivery avec l'ID " + deliveryId + " est introuvable"
+                        )
+                );
+
+        if (delivery.getDeliveryStatus() != DeliveryStatus.EN_ATTENTE) {
+            throw new RuntimeException(
+                    "Seule une livraison EN_ATTENTE peut être assignée"
+            );
+        }
+
+        CollectionPoint collectionPoint = delivery.getCollectionPoint();
+
+        if (collectionPoint == null) {
+            throw new RuntimeException(
+                    "Aucun point de collecte associé à cette livraison"
+            );
+        }
+
+        Zone zone = collectionPoint.getZone();
+
+        List<Driver> availableDrivers =
+                driverRepository.findByZoneAndDriverStatus(
+                        zone,
+                        DriverStatus.DISPONIBLE
+                );
+
+        if (availableDrivers.isEmpty()) {
+            throw new RuntimeException(
+                    "Aucun driver disponible dans cette zone"
+            );
+        }
+
+        Driver nearestDriver = null;
+        double minimumDistance = Double.MAX_VALUE;
+
+        for (Driver driver : availableDrivers) {
+
+            Optional<DriverLocation> locationOptional =
+                    driverLocationRepository
+                            .findFirstByDriverOrderByTimestampDesc(driver);
+
+            if (locationOptional.isEmpty()) {
+                continue;
+            }
+
+            DriverLocation location = locationOptional.get();
+
+            double distance = calculateDistance(
+                    collectionPoint.getLatitude(),
+                    collectionPoint.getLongitude(),
+                    location.getLatitude(),
+                    location.getLongitude()
+            );
+
+            if (distance < minimumDistance) {
+                minimumDistance = distance;
+                nearestDriver = driver;
+            }
+        }
+
+        if (nearestDriver == null) {
+            throw new RuntimeException(
+                    "Aucun driver disponible avec une position GPS connue"
+            );
+        }
+
+        delivery.setDriver(nearestDriver);
+        delivery.setDeliveryStatus(DeliveryStatus.ASSIGNEE);
+
+        nearestDriver.setDriverStatus(DriverStatus.EN_LIVRAISON);
+
+        driverRepository.save(nearestDriver);
+
+        Delivery savedDelivery =
+                deliveryRepository.save(delivery);
 
         return deliveryMapper.toResponseDto(savedDelivery);
     }

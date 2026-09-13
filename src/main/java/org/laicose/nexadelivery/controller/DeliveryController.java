@@ -85,7 +85,7 @@ public class DeliveryController {
 
     @PutMapping("/{id}/my-status")
     @PreAuthorize("hasRole('DRIVER')")
-    public ResponseEntity<DeliveryDtoResp> updateMyDeliveryStatus(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long id,@Valid @RequestBody DeliveryStatus newStatus){
+    public ResponseEntity<DeliveryDtoResp> updateMyDeliveryStatus(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long id,@Valid @RequestBody DeliveryStatusReq newStatus){
         return ResponseEntity.ok(deliveryService.updateMyDeliveryStatus(userDetails.getUsername(), id, newStatus));
     }
 
@@ -93,6 +93,19 @@ public class DeliveryController {
     @PreAuthorize("hasRole('MERCHANT')")
     public ResponseEntity<DeliveryDtoResp> cancelMyDelivery(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long id){
         return ResponseEntity.ok(deliveryService.cancelMyDelivery(userDetails.getUsername(), id));
+    }
+
+    @PostMapping("/{deliveryId}/auto-assign/{collectionPointId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<DeliveryDtoResp> autoAssignDriver(
+            @PathVariable Long deliveryId,
+            @PathVariable Long collectionPointId) {
+
+        return ResponseEntity.ok(
+                deliveryService.autoAssignDriver(
+                        deliveryId
+                )
+        );
     }
 
     @DeleteMapping("/{id}")

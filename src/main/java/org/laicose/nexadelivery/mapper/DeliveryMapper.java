@@ -18,10 +18,12 @@ public interface DeliveryMapper {
        @Mapping(target = "driver", ignore = true)
        @Mapping(target = "merchant", ignore = true)
        @Mapping(target = "rating", ignore = true)
+       @Mapping(target = "collectionPoint", ignore = true)
        Delivery toEntityDto(DeliveryDtoReq deliveryDtoReq);
 
        @Mapping(source = "driver.id", target = "driverId")
        @Mapping(source = "merchant.id", target = "merchantId")
+       @Mapping(source = "collectionPoint.id", target = "collectionPointId")
        DeliveryDtoResp toResponseDto(Delivery delivery);
 
        List<DeliveryDtoResp> toListDto(List<Delivery> deliveries);

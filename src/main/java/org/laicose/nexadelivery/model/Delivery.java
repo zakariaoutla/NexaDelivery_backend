@@ -40,4 +40,8 @@ public class Delivery {
 
     @OneToOne(mappedBy = "delivery")
     private Rating rating;
+
+    @ManyToOne
+    @JoinColumn(name = "collection_point_id", nullable = false)
+    private CollectionPoint collectionPoint;
 }
