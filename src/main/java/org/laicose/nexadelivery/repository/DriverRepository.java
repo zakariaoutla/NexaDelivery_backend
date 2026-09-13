@@ -15,4 +15,6 @@ public interface DriverRepository extends JpaRepository<Driver, Long> {
             DriverStatus driverStatus
     );
 
+    long countByDriverStatus(DriverStatus driverStatus);
+
 }
