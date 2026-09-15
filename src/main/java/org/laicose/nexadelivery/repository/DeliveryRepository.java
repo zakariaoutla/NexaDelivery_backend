@@ -24,4 +24,18 @@ public interface DeliveryRepository extends JpaRepository<Delivery, Long> {
 
     long countByDeliveryStatus(DeliveryStatus deliveryStatus);
 
+    long countByMerchant(
+            Merchant merchant
+    );
+
+    long countByMerchantAndDeliveryStatus(
+            Merchant merchant,
+            DeliveryStatus deliveryStatus
+    );
+
+    long countByMerchantAndDeliveryStatusIn(
+            Merchant merchant,
+            List<DeliveryStatus> statuses
+    );
+
 }
