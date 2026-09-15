@@ -98,8 +98,7 @@ public class DeliveryController {
     @PostMapping("/{deliveryId}/auto-assign/{collectionPointId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DeliveryDtoResp> autoAssignDriver(
-            @PathVariable Long deliveryId,
-            @PathVariable Long collectionPointId) {
+            @PathVariable Long deliveryId) {
 
         return ResponseEntity.ok(
                 deliveryService.autoAssignDriver(
