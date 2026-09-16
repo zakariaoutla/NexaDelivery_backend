@@ -10,9 +10,6 @@ import org.laicose.nexadelivery.Enum.DeliveryStatus;
 @Setter
 public class DeliveryDtoReq {
 
-    @NotBlank(message = "Pickup Address est obligatoire")
-    private String pickupAddress;
-
     @NotBlank(message = "Drop Address est obligatoire")
     private String dropAddress;
 

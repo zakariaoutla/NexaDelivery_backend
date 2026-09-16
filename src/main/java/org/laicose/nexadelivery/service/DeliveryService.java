@@ -41,13 +41,18 @@ public class DeliveryService {
         return deliveryMapper.toResponseDto(delivery);
     }
 
-    public DeliveryDtoResp createDelivery(String email,DeliveryDtoReq deliveryDtoReq){
+    public DeliveryDtoResp createDelivery(
+            String email,
+            DeliveryDtoReq deliveryDtoReq
+    ) {
+
         Merchant merchant = merchantRepository.findByEmail(email)
                 .orElseThrow(() ->
                         new RuntimeException(
                                 "Merchant avec l'email " + email + " est introuvable"
                         )
                 );
+
         CollectionPoint collectionPoint = collectionPointRepository
                 .findByIdAndMerchant(
                         deliveryDtoReq.getCollectionPointId(),
@@ -58,15 +63,32 @@ public class DeliveryService {
                                 "Point de collecte introuvable pour ce merchant"
                         )
                 );
+
         Delivery delivery = deliveryMapper.toEntityDto(deliveryDtoReq);
+
         delivery.setCollectionPoint(collectionPoint);
+
+        delivery.setPickupAddress(collectionPoint.getAddress());
+
         delivery.setMerchant(merchant);
         delivery.setCreatedAt(LocalDateTime.now());
-        delivery.setTrackingCode("NX-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+
+        delivery.setTrackingCode(
+                "NX-" +
+                        UUID.randomUUID()
+                                .toString()
+                                .substring(0, 8)
+                                .toUpperCase()
+        );
+
         delivery.setDeliveryStatus(DeliveryStatus.EN_ATTENTE);
+
         Delivery savedDelivery = deliveryRepository.save(delivery);
+
         return deliveryMapper.toResponseDto(savedDelivery);
     }
+
+
 
     public DeliveryDtoResp updateDelivery(Long id, DeliveryDtoReq deliveryDtoReq){
         Delivery delivery = deliveryRepository.findById(id).orElseThrow(()->new RuntimeException("Delivery avec l'ID " + id + " est introuvable"));
@@ -75,12 +97,15 @@ public class DeliveryService {
         delivery.setClientPhone(deliveryDtoReq.getClientPhone());
         delivery.setDescription(deliveryDtoReq.getDescription());
         delivery.setDropAddress(deliveryDtoReq.getDropAddress());
-        delivery.setPickupAddress(deliveryDtoReq.getPickupAddress());
 
         Delivery updatedDelivery = deliveryRepository.save(delivery);
 
         return deliveryMapper.toResponseDto(updatedDelivery);
     }
+
+
+
+
 
     public DeliveryDtoResp findByTrackingCode(String trackingCode){
         Delivery delivery = deliveryRepository.findByTrackingCode(trackingCode).orElseThrow(()-> new RuntimeException("Delivery avec Tracking code " + trackingCode + " est introuvable"));
