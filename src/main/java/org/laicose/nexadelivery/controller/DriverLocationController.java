@@ -54,6 +54,21 @@ public class DriverLocationController {
         );
     }
 
+    @GetMapping("/delivery/{deliveryId}/latest")
+    @PreAuthorize("hasRole('MERCHANT')")
+    public ResponseEntity<DriverLocationDtoResp> getLatestLocationByDelivery(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Long deliveryId
+    ) {
+
+        return ResponseEntity.ok(
+                driverLocationService.getLatestLocationByDelivery(
+                        userDetails.getUsername(),
+                        deliveryId
+                )
+        );
+    }
+
     @GetMapping("/driver/{driverId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<DriverLocationDtoResp>> getDriverLocations(

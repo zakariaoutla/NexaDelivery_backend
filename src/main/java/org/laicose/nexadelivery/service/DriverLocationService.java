@@ -99,6 +99,49 @@ public class DriverLocationService {
         return driverLocationMapper.toResponse(driverLocation);
     }
 
+    public DriverLocationDtoResp getLatestLocationByDelivery(
+            String merchantEmail,
+            Long deliveryId
+    ) {
+
+        Delivery delivery = deliveryRepository.findById(deliveryId)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Delivery avec l'ID "
+                                        + deliveryId
+                                        + " est introuvable"
+                        )
+                );
+
+        if (!delivery.getMerchant()
+                .getEmail()
+                .equals(merchantEmail)) {
+
+            throw new RuntimeException(
+                    "Vous n'êtes pas autorisé à suivre cette livraison"
+            );
+        }
+
+        Driver driver = delivery.getDriver();
+
+        if (driver == null) {
+            throw new RuntimeException(
+                    "Aucun driver n'est assigné à cette livraison"
+            );
+        }
+
+        DriverLocation location =
+                driverLocationRepository
+                        .findFirstByDriverOrderByTimestampDesc(driver)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Aucune localisation disponible pour ce driver"
+                                )
+                        );
+
+        return driverLocationMapper.toResponse(location);
+    }
+
     public Page<DriverLocationDtoResp> getDriverLocations(
             Long driverId,
             Pageable pageable) {
