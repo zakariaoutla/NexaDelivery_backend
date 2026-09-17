@@ -42,6 +42,18 @@ public class DriverController {
         return ResponseEntity.ok(driverService.getDriverById(id));
     }
 
+    @GetMapping("/me")
+    @PreAuthorize("hasRole('DRIVER')")
+    public ResponseEntity<DriverDtoResp> getMyProfile(
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        return ResponseEntity.ok(
+                driverService.getMyProfile(
+                        userDetails.getUsername()
+                )
+        );
+    }
+
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DriverDtoResp> updateDriver(@PathVariable long id,@Valid @RequestBody DriverUpdateReq driverUpdateReq){

@@ -38,6 +38,21 @@ public class DriverService {
         return driverMapper.toResponseDto(driver);
     }
 
+    public DriverDtoResp getMyProfile(String email) {
+
+        Driver driver = driverRepository
+                .findByEmail(email)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Driver avec l'email "
+                                        + email
+                                        + " est introuvable"
+                        )
+                );
+
+        return driverMapper.toResponseDto(driver);
+    }
+
     public DriverDtoResp updateDriver(Long id, DriverUpdateReq driverUpdateReq){
 
         Driver driver = driverRepository.findById(id)
