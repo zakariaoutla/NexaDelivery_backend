@@ -2,6 +2,7 @@ package org.laicose.nexadelivery.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.laicose.nexadelivery.dto.response.DashboardStatsResp;
+import org.laicose.nexadelivery.dto.response.DriverDashboardStatsResp;
 import org.laicose.nexadelivery.dto.response.MerchantDashboardStatsResp;
 import org.laicose.nexadelivery.service.StatisticsService;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +38,19 @@ public class StatisticsController {
 
         return ResponseEntity.ok(
                 statisticsService.getMerchantDashboardStats(
+                        userDetails.getUsername()
+                )
+        );
+    }
+
+    @GetMapping("/driver")
+    @PreAuthorize("hasRole('DRIVER')")
+    public ResponseEntity<DriverDashboardStatsResp> getDriverDashboardStats(
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+
+        return ResponseEntity.ok(
+                statisticsService.getDriverDashboardStats(
                         userDetails.getUsername()
                 )
         );
