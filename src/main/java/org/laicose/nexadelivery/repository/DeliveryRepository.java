@@ -38,4 +38,9 @@ public interface DeliveryRepository extends JpaRepository<Delivery, Long> {
             List<DeliveryStatus> statuses
     );
 
+    Optional<Delivery> findByIdAndMerchant(
+            Long id,
+            Merchant merchant
+    );
+
 }

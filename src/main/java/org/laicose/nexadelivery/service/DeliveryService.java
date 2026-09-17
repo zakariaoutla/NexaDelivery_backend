@@ -41,6 +41,26 @@ public class DeliveryService {
         return deliveryMapper.toResponseDto(delivery);
     }
 
+    public DeliveryDtoResp getMyDeliveryById(String email, Long id) {
+
+        Merchant merchant = merchantRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Merchant avec l'email " + email + " est introuvable"
+                        )
+                );
+
+        Delivery delivery = deliveryRepository
+                .findByIdAndMerchant(id, merchant)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Livraison introuvable"
+                        )
+                );
+
+        return deliveryMapper.toResponseDto(delivery);
+    }
+
     public DeliveryDtoResp createDelivery(
             String email,
             DeliveryDtoReq deliveryDtoReq

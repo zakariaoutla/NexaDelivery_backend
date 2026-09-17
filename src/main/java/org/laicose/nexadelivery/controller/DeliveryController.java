@@ -40,6 +40,20 @@ public class DeliveryController {
         return ResponseEntity.ok(deliveryService.findDeliveryById(id));
     }
 
+    @GetMapping("/{id}/me")
+    @PreAuthorize("hasRole('MERCHANT')")
+    public ResponseEntity<DeliveryDtoResp> getMyDeliveryById(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Long id
+    ) {
+        return ResponseEntity.ok(
+                deliveryService.getMyDeliveryById(
+                        userDetails.getUsername(),
+                        id
+                )
+        );
+    }
+
     @PostMapping
     @PreAuthorize("hasRole('MERCHANT')")
     public ResponseEntity<DeliveryDtoResp> postDelivery(@Valid @RequestBody DeliveryDtoReq deliveryDtoReq, @AuthenticationPrincipal UserDetails userDetails){
@@ -95,7 +109,7 @@ public class DeliveryController {
         return ResponseEntity.ok(deliveryService.cancelMyDelivery(userDetails.getUsername(), id));
     }
 
-    @PostMapping("/{deliveryId}/auto-assign/{collectionPointId}")
+    @PostMapping("/{deliveryId}/auto-assign")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DeliveryDtoResp> autoAssignDriver(
             @PathVariable Long deliveryId) {
