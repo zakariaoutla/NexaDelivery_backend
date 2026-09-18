@@ -75,6 +75,8 @@ public class DriverController {
         );
     }
 
+
+
     @PutMapping("/{id}/status")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DriverDtoResp> updateDriverStatus(@PathVariable long id,@Valid @RequestBody DriverDtoReq driverDtoReq){

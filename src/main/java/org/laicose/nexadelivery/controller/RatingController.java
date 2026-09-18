@@ -43,6 +43,21 @@ public class RatingController {
         return ResponseEntity.ok(ratingService.findRatingById(id));
     }
 
+    @GetMapping("/delivery/{deliveryId}")
+    @PreAuthorize("hasRole('MERCHANT')")
+    public ResponseEntity<RatingDtoResp> getRatingByDelivery(
+            @PathVariable Long deliveryId,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+
+        return ResponseEntity.ok(
+                ratingService.findRatingByDeliveryId(
+                        deliveryId,
+                        userDetails.getUsername()
+                )
+        );
+    }
+
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','MERCHANT')")
     public ResponseEntity<RatingDtoResp> putRating(@PathVariable Long id, @Valid @RequestBody RatingDtoReq ratingDtoReq, @AuthenticationPrincipal UserDetails userDetails){

@@ -67,6 +67,41 @@ public class RatingService {
         return ratingMapper.toResponseDto(rating);
     }
 
+    public RatingDtoResp findRatingByDeliveryId(
+            Long deliveryId,
+            String email
+    ) {
+
+        Delivery delivery = deliveryRepository.findById(deliveryId)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Delivery avec l'ID " + deliveryId + " est introuvable"
+                        )
+                );
+
+        Merchant merchant = merchantRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Merchant avec l'email " + email + " est introuvable"
+                        )
+                );
+
+        if (delivery.getMerchant().getId() != merchant.getId()) {
+            throw new RuntimeException(
+                    "Vous n'êtes pas autorisé à consulter cette évaluation"
+            );
+        }
+
+        Rating rating = ratingRepository.findByDeliveryId(deliveryId)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Cette livraison n'a pas encore d'évaluation"
+                        )
+                );
+
+        return ratingMapper.toResponseDto(rating);
+    }
+
     public Page<RatingDtoResp> findAllRating(Pageable pageable){
         Page<Rating> ratings = ratingRepository.findAll(pageable);
         return ratings.map(ratingMapper::toResponseDto);
