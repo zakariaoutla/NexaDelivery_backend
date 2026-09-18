@@ -18,7 +18,9 @@ public interface DriverMapper {
     Driver toEntityDto(DriverRegister driverRegister);
 
     @Mapping(source = "vehicle.id", target = "vehicleId")
+    @Mapping(source = "vehicle.type", target = "vehicleType")
     @Mapping(source = "zone.id", target = "zoneId")
+    @Mapping(source = "zone.name", target = "zoneName")
     DriverDtoResp toResponseDto(Driver driver);
 
     List<DriverDtoResp> toListDto(List<Driver> drivers);
