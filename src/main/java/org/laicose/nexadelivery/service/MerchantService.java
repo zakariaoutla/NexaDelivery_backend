@@ -10,6 +10,9 @@ import org.laicose.nexadelivery.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.laicose.nexadelivery.configuration.JwtUtil;
+import org.laicose.nexadelivery.dto.response.ProfileUpdateResp;
+
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +21,7 @@ public class MerchantService {
     private final MerchantRepository merchantRepository;
     private final MerchantMapper merchantMapper;
     private final UserRepository userRepository;
+    private final JwtUtil jwtUtil;
 
     public Page<MerchantDtoResp> getAllMerchant(Pageable pageable){
         Page<Merchant> merchants = merchantRepository.findAll(pageable);
@@ -69,18 +73,47 @@ public class MerchantService {
 
     }
 
-    public MerchantDtoResp updateMyProfile(
-            String email,
-            MerchantUpdateReq request) {
+    public ProfileUpdateResp<MerchantDtoResp> updateMyProfile(
+            String currentEmail,
+            MerchantUpdateReq request
+    ) {
 
-        Merchant merchant = merchantRepository.findByEmail(email)
+        Merchant merchant = merchantRepository
+                .findByEmail(currentEmail)
                 .orElseThrow(() ->
                         new RuntimeException(
-                                "Merchant avec l'email " + email + " est introuvable"
+                                "Merchant avec l'email "
+                                        + currentEmail
+                                        + " est introuvable"
                         )
                 );
 
-        return applyMerchantUpdate(merchant, request);
+        if (!currentEmail.equalsIgnoreCase(request.getEmail())
+                && userRepository.existsByEmail(request.getEmail())) {
+
+            throw new RuntimeException(
+                    "Cet email est déjà utilisé"
+            );
+        }
+
+        merchant.setName(request.getName());
+        merchant.setEmail(request.getEmail());
+        merchant.setTelephone(request.getTelephone());
+        merchant.setBusinessName(request.getBusinessName());
+
+        Merchant updatedMerchant =
+                merchantRepository.save(merchant);
+
+        String newToken =
+                jwtUtil.generateToken(updatedMerchant);
+
+        MerchantDtoResp merchantDto =
+                merchantMapper.toResponseDto(updatedMerchant);
+
+        return new ProfileUpdateResp<>(
+                merchantDto,
+                newToken
+        );
     }
 
 

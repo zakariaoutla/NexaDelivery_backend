@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.laicose.nexadelivery.dto.request.MerchantUpdateReq;
 import org.laicose.nexadelivery.dto.response.MerchantDtoResp;
+import org.laicose.nexadelivery.dto.response.ProfileUpdateResp;
 import org.laicose.nexadelivery.service.MerchantService;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -48,9 +49,19 @@ public class MerchantController {
 
     @PutMapping("/me")
     @PreAuthorize("hasRole('MERCHANT')")
-    public ResponseEntity<MerchantDtoResp> updateMyProfile(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody MerchantUpdateReq merchantUpdateReq){
-        return ResponseEntity.ok(merchantService.updateMyProfile(userDetails.getUsername(), merchantUpdateReq));
+    public ResponseEntity<ProfileUpdateResp<MerchantDtoResp>> updateMyProfile(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody MerchantUpdateReq merchantUpdateReq
+    ) {
+
+        return ResponseEntity.ok(
+                merchantService.updateMyProfile(
+                        userDetails.getUsername(),
+                        merchantUpdateReq
+                )
+        );
     }
+
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")

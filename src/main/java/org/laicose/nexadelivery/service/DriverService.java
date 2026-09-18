@@ -2,7 +2,6 @@ package org.laicose.nexadelivery.service;
 
 import lombok.RequiredArgsConstructor;
 import org.laicose.nexadelivery.dto.request.DriverDtoReq;
-import org.laicose.nexadelivery.dto.request.DriverRegister;
 import org.laicose.nexadelivery.dto.request.DriverUpdateReq;
 import org.laicose.nexadelivery.dto.response.DriverDtoResp;
 import org.laicose.nexadelivery.mapper.DriverMapper;
@@ -10,13 +9,14 @@ import org.laicose.nexadelivery.model.Driver;
 import org.laicose.nexadelivery.model.Vehicle;
 import org.laicose.nexadelivery.model.Zone;
 import org.laicose.nexadelivery.repository.DriverRepository;
+import org.laicose.nexadelivery.repository.UserRepository;
 import org.laicose.nexadelivery.repository.VehicleRepository;
 import org.laicose.nexadelivery.repository.ZoneRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.config.SpringDataWebSettings;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.laicose.nexadelivery.configuration.JwtUtil;
+import org.laicose.nexadelivery.dto.response.ProfileUpdateResp;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +26,8 @@ public class DriverService {
     private final DriverMapper driverMapper;
     private final VehicleRepository vehicleRepository;
     private final ZoneRepository zoneRepository;
+    private final UserRepository userRepository;
+    private final JwtUtil jwtUtil;
 
 
     public Page<DriverDtoResp> getAllDriver(Pageable pageable){
@@ -71,6 +73,44 @@ public class DriverService {
         return driverMapper.toResponseDto(updatedDriver);
     }
 
+    public ProfileUpdateResp<DriverDtoResp> updateMyProfile(
+            String currentEmail,
+            DriverUpdateReq request
+    ) {
+
+        Driver driver = driverRepository
+                .findByEmail(currentEmail)
+                .orElseThrow(
+                        () -> new RuntimeException("Driver introuvable")
+                );
+
+        if (!currentEmail.equalsIgnoreCase(request.getEmail())
+                && userRepository.existsByEmail(request.getEmail())) {
+
+            throw new RuntimeException(
+                    "Cette adresse e-mail est déjà utilisée"
+            );
+        }
+
+        driver.setName(request.getName());
+        driver.setEmail(request.getEmail());
+        driver.setTelephone(request.getTelephone());
+
+        Driver updatedDriver =
+                driverRepository.save(driver);
+
+        String newToken =
+                jwtUtil.generateToken(updatedDriver);
+
+        DriverDtoResp driverDto =
+                driverMapper.toResponseDto(updatedDriver);
+
+        return new ProfileUpdateResp<>(
+                driverDto,
+                newToken
+        );
+    }
+
     public DriverDtoResp updateDriverStatus(Long id, DriverDtoReq driverDtoReq){
         Driver driver = driverRepository.findById(id).orElseThrow(()->new RuntimeException("Driver avec l'ID " + id + " est introuvable"));
 
@@ -94,6 +134,8 @@ public class DriverService {
 
         return driverMapper.toResponseDto(updatedDriver);
     }
+
+
 
     public void deleteDriver(Long id){
         Driver driver = driverRepository.findById(id)
