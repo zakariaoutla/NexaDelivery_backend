@@ -247,8 +247,11 @@ public class DeliveryService {
                     newStatus == DeliveryStatus.ANNULEE;
 
             case ASSIGNEE ->
-                    newStatus == DeliveryStatus.RECUPEREE
+                    newStatus == DeliveryStatus.ACCEPTEE
                             || newStatus == DeliveryStatus.ANNULEE;
+
+            case ACCEPTEE ->
+                    newStatus == DeliveryStatus.RECUPEREE;
 
             case RECUPEREE ->
                     newStatus == DeliveryStatus.EN_ROUTE;
@@ -256,7 +259,8 @@ public class DeliveryService {
             case EN_ROUTE ->
                     newStatus == DeliveryStatus.LIVREE;
 
-            case LIVREE, ANNULEE -> false;
+            case LIVREE, ANNULEE ->
+                    false;
         };
     }
 
@@ -303,6 +307,9 @@ public class DeliveryService {
         boolean validTransition = switch (currentStatus) {
 
             case ASSIGNEE ->
+                    newStatus == DeliveryStatus.ACCEPTEE;
+
+            case ACCEPTEE ->
                     newStatus == DeliveryStatus.RECUPEREE;
 
             case RECUPEREE ->
@@ -311,7 +318,8 @@ public class DeliveryService {
             case EN_ROUTE ->
                     newStatus == DeliveryStatus.LIVREE;
 
-            case EN_ATTENTE, LIVREE, ANNULEE -> false;
+            case EN_ATTENTE, LIVREE, ANNULEE ->
+                    false;
         };
 
         if (!validTransition) {
@@ -324,10 +332,28 @@ public class DeliveryService {
 
         delivery.setDeliveryStatus(newStatus);
 
-        if (newStatus == DeliveryStatus.LIVREE) {
+        if (newStatus == DeliveryStatus.ACCEPTEE) {
+
             Driver driver = delivery.getDriver();
-            driver.setDriverStatus(DriverStatus.DISPONIBLE);
+
+            driver.setDriverStatus(
+                    DriverStatus.EN_LIVRAISON
+            );
+
             driverRepository.save(driver);
+        }
+
+        if (newStatus == DeliveryStatus.LIVREE) {
+
+            Driver driver = delivery.getDriver();
+
+            driver.setDriverStatus(
+                    DriverStatus.DISPONIBLE
+            );
+
+            driverRepository.save(driver);
+
+            assignWaitingDeliveryToDriver(driver);
         }
 
         Delivery savedDelivery = deliveryRepository.save(delivery);
@@ -357,37 +383,49 @@ public class DeliveryService {
         return deliveryMapper.toResponseDto(savedDelivery);
     }
 
+    @Transactional
     public DeliveryDtoResp cancelMyDelivery(String email, Long deliveryId) {
 
         Merchant merchant = merchantRepository.findByEmail(email)
                 .orElseThrow(() ->
-                        new RuntimeException(
-                                "Merchant avec l'email " + email + " est introuvable"
-                        )
+                        new RuntimeException("Merchant introuvable")
                 );
 
         Delivery delivery = deliveryRepository.findById(deliveryId)
                 .orElseThrow(() ->
-                        new RuntimeException(
-                                "Delivery avec l'ID " + deliveryId + " est introuvable"
-                        )
+                        new RuntimeException("Livraison introuvable")
                 );
 
-        if (delivery.getMerchant().getId()!=(merchant.getId())) {
+        if (delivery.getMerchant().getId() != merchant.getId()) {
             throw new RuntimeException(
                     "Vous n'êtes pas autorisé à annuler cette livraison"
             );
         }
 
-        if (delivery.getDeliveryStatus() != DeliveryStatus.EN_ATTENTE) {
+        DeliveryStatus currentStatus = delivery.getDeliveryStatus();
+
+        if (currentStatus != DeliveryStatus.EN_ATTENTE
+                && currentStatus != DeliveryStatus.ASSIGNEE) {
+
             throw new RuntimeException(
-                    "Cette livraison ne peut être annulée que si elle est en attente"
+                    "Cette livraison ne peut plus être annulée"
             );
         }
+
+        Driver driver = delivery.getDriver();
 
         delivery.setDeliveryStatus(DeliveryStatus.ANNULEE);
 
         Delivery savedDelivery = deliveryRepository.save(delivery);
+
+
+        if (driver != null) {
+
+            driver.setDriverStatus(DriverStatus.DISPONIBLE);
+            driverRepository.save(driver);
+
+            assignWaitingDeliveryToDriver(driver);
+        }
 
         return deliveryMapper.toResponseDto(savedDelivery);
     }
@@ -418,9 +456,14 @@ public class DeliveryService {
         return EARTH_RADIUS * c;
     }
 
-
     @Transactional
     public DeliveryDtoResp autoAssignDriver(Long deliveryId) {
+        return autoAssignDriver(deliveryId, null);
+    }
+
+
+    @Transactional
+    public DeliveryDtoResp autoAssignDriver(Long deliveryId,Long excludedDriverId) {
 
         Delivery delivery = deliveryRepository.findById(deliveryId)
                 .orElseThrow(() ->
@@ -452,7 +495,16 @@ public class DeliveryService {
                         DriverStatus.DISPONIBLE
                 );
 
-        
+        if (excludedDriverId != null) {
+
+            availableDrivers = availableDrivers.stream()
+                    .filter(driver ->
+                            driver.getId() != excludedDriverId
+                    )
+                    .toList();
+        }
+
+
         if (availableDrivers.isEmpty()) {
             return deliveryMapper.toResponseDto(delivery);
         }
@@ -505,7 +557,7 @@ public class DeliveryService {
         );
 
         nearestDriver.setDriverStatus(
-                DriverStatus.EN_LIVRAISON
+                DriverStatus.EN_ATTENTE_ACCEPTATION
         );
 
         driverRepository.save(nearestDriver);
@@ -523,6 +575,105 @@ public class DeliveryService {
 
         return deliveryMapper.toResponseDto(
                 savedDelivery
+        );
+    }
+
+
+    @Transactional
+    public DeliveryDtoResp rejectMyDelivery(
+            String email,
+            Long deliveryId
+    ) {
+
+        Driver driver = driverRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new RuntimeException("Driver introuvable")
+                );
+
+        Delivery delivery = deliveryRepository.findById(deliveryId)
+                .orElseThrow(() ->
+                        new RuntimeException("Livraison introuvable")
+                );
+
+        if (delivery.getDriver() == null
+                || delivery.getDriver().getId() != driver.getId()) {
+
+            throw new RuntimeException(
+                    "Vous n'êtes pas autorisé à refuser cette livraison"
+            );
+        }
+
+        if (delivery.getDeliveryStatus() != DeliveryStatus.ASSIGNEE && delivery.getDeliveryStatus() != DeliveryStatus.ACCEPTEE) {
+
+            throw new RuntimeException(
+                    "Cette livraison ne peut plus être refusée"
+            );
+        }
+
+        Long rejectedDriverId = driver.getId();
+
+        driver.setDriverStatus(
+                DriverStatus.DISPONIBLE
+        );
+
+        driverRepository.save(driver);
+
+        delivery.setDriver(null);
+
+        delivery.setDeliveryStatus(
+                DeliveryStatus.EN_ATTENTE
+        );
+
+        deliveryRepository.save(delivery);
+
+        return autoAssignDriver(
+                delivery.getId(),
+                rejectedDriverId
+        );
+    }
+
+    @Transactional
+    public void assignWaitingDeliveryToDriver(Driver driver) {
+
+        if (driver.getDriverStatus() != DriverStatus.DISPONIBLE) {
+            return;
+        }
+
+        if (driver.getZone() == null) {
+            return;
+        }
+
+        Optional<Delivery> waitingDelivery =
+                deliveryRepository
+                        .findByCollectionPointZoneAndDeliveryStatusOrderByCreatedAtAsc(
+                                driver.getZone(),
+                                DeliveryStatus.EN_ATTENTE
+                        );
+
+        if (waitingDelivery.isEmpty()) {
+            return;
+        }
+
+        Delivery delivery = waitingDelivery.get();
+
+        delivery.setDriver(driver);
+        delivery.setDeliveryStatus(
+                DeliveryStatus.ASSIGNEE
+        );
+
+        driver.setDriverStatus(
+                DriverStatus.EN_ATTENTE_ACCEPTATION
+        );
+
+        driverRepository.save(driver);
+
+        Delivery savedDelivery =
+                deliveryRepository.save(delivery);
+
+        notificationService.createNotification(
+                driver,
+                savedDelivery,
+                "Une nouvelle livraison vous a été assignée"
         );
     }
 

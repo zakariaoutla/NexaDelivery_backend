@@ -23,14 +23,18 @@ public class StatisticsService {
     private final DriverRepository driverRepository;
     private final MerchantRepository merchantRepository;
 
+    
 
     public DashboardStatsResp getDashboardStats() {
 
-        DashboardStatsResp stats = new DashboardStatsResp();
+        DashboardStatsResp stats =
+                new DashboardStatsResp();
+
 
         stats.setTotalDeliveries(
                 deliveryRepository.count()
         );
+
 
         stats.setPendingDeliveries(
                 deliveryRepository.countByDeliveryStatus(
@@ -38,29 +42,13 @@ public class StatisticsService {
                 )
         );
 
+
         stats.setAssignedDeliveries(
                 deliveryRepository.countByDeliveryStatus(
                         DeliveryStatus.ASSIGNEE
                 )
         );
 
-        stats.setInRouteDeliveries(
-                deliveryRepository.countByDeliveryStatus(
-                        DeliveryStatus.EN_ROUTE
-                )
-        );
-
-        stats.setDeliveredDeliveries(
-                deliveryRepository.countByDeliveryStatus(
-                        DeliveryStatus.LIVREE
-                )
-        );
-
-        stats.setCancelledDeliveries(
-                deliveryRepository.countByDeliveryStatus(
-                        DeliveryStatus.ANNULEE
-                )
-        );
 
         stats.setPickedUpDeliveries(
                 deliveryRepository.countByDeliveryStatus(
@@ -68,9 +56,32 @@ public class StatisticsService {
                 )
         );
 
+
+        stats.setInRouteDeliveries(
+                deliveryRepository.countByDeliveryStatus(
+                        DeliveryStatus.EN_ROUTE
+                )
+        );
+
+
+        stats.setDeliveredDeliveries(
+                deliveryRepository.countByDeliveryStatus(
+                        DeliveryStatus.LIVREE
+                )
+        );
+
+
+        stats.setCancelledDeliveries(
+                deliveryRepository.countByDeliveryStatus(
+                        DeliveryStatus.ANNULEE
+                )
+        );
+
+
         stats.setTotalDrivers(
                 driverRepository.count()
         );
+
 
         stats.setAvailableDrivers(
                 driverRepository.countByDriverStatus(
@@ -78,9 +89,11 @@ public class StatisticsService {
                 )
         );
 
+
         stats.setTotalMerchants(
                 merchantRepository.count()
         );
+
 
         return stats;
     }
@@ -91,18 +104,23 @@ public class StatisticsService {
             String email
     ) {
 
-        Merchant merchant = merchantRepository
-                .findByEmail(email)
-                .orElseThrow(
-                        () -> new RuntimeException(
-                                "Merchant introuvable"
-                        )
-                );
+        Merchant merchant =
+                merchantRepository
+                        .findByEmail(email)
+                        .orElseThrow(
+                                () ->
+                                        new RuntimeException(
+                                                "Merchant introuvable"
+                                        )
+                        );
+
 
         long totalDeliveries =
-                deliveryRepository.countByMerchant(
-                        merchant
-                );
+                deliveryRepository
+                        .countByMerchant(
+                                merchant
+                        );
+
 
         long pendingDeliveries =
                 deliveryRepository
@@ -111,16 +129,19 @@ public class StatisticsService {
                                 DeliveryStatus.EN_ATTENTE
                         );
 
+
         long inProgressDeliveries =
                 deliveryRepository
                         .countByMerchantAndDeliveryStatusIn(
                                 merchant,
                                 List.of(
                                         DeliveryStatus.ASSIGNEE,
+                                        DeliveryStatus.ACCEPTEE,
                                         DeliveryStatus.RECUPEREE,
                                         DeliveryStatus.EN_ROUTE
                                 )
                         );
+
 
         long deliveredDeliveries =
                 deliveryRepository
@@ -128,6 +149,7 @@ public class StatisticsService {
                                 merchant,
                                 DeliveryStatus.LIVREE
                         );
+
 
         return new MerchantDashboardStatsResp(
                 totalDeliveries,
@@ -142,13 +164,15 @@ public class StatisticsService {
             String email
     ) {
 
-        Driver driver = driverRepository
-                .findByEmail(email)
-                .orElseThrow(
-                        () -> new RuntimeException(
-                                "Driver introuvable"
-                        )
-                );
+        Driver driver =
+                driverRepository
+                        .findByEmail(email)
+                        .orElseThrow(
+                                () ->
+                                        new RuntimeException(
+                                                "Driver introuvable"
+                                        )
+                        );
 
 
         long assignedDeliveries =
@@ -164,6 +188,7 @@ public class StatisticsService {
                         .countByDriverAndDeliveryStatusIn(
                                 driver,
                                 List.of(
+                                        DeliveryStatus.ACCEPTEE,
                                         DeliveryStatus.RECUPEREE,
                                         DeliveryStatus.EN_ROUTE
                                 )

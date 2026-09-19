@@ -121,6 +121,20 @@ public class DeliveryController {
         );
     }
 
+    @PutMapping("/{id}/reject")
+    @PreAuthorize("hasRole('DRIVER')")
+    public ResponseEntity<DeliveryDtoResp> rejectMyDelivery(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        return ResponseEntity.ok(
+                deliveryService.rejectMyDelivery(
+                        userDetails.getUsername(),
+                        id
+                )
+        );
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteDelivery(@PathVariable Long id){

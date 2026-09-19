@@ -58,6 +58,7 @@ public class DriverLocationService {
                         driver,
                         List.of(
                                 DeliveryStatus.ASSIGNEE,
+                                DeliveryStatus.ACCEPTEE,
                                 DeliveryStatus.RECUPEREE,
                                 DeliveryStatus.EN_ROUTE
                         )
@@ -99,6 +100,8 @@ public class DriverLocationService {
         return driverLocationMapper.toResponse(driverLocation);
     }
 
+    
+
     public DriverLocationDtoResp getLatestLocationByDelivery(
             String merchantEmail,
             Long deliveryId
@@ -113,6 +116,7 @@ public class DriverLocationService {
                         )
                 );
 
+
         if (!delivery.getMerchant()
                 .getEmail()
                 .equals(merchantEmail)) {
@@ -122,13 +126,33 @@ public class DriverLocationService {
             );
         }
 
+
+        List<DeliveryStatus> trackingAllowedStatuses = List.of(
+                DeliveryStatus.ACCEPTEE,
+                DeliveryStatus.RECUPEREE,
+                DeliveryStatus.EN_ROUTE
+        );
+
+        if (!trackingAllowedStatuses.contains(
+                delivery.getDeliveryStatus()
+        )) {
+
+            throw new RuntimeException(
+                    "Le suivi n'est pas disponible pour cette livraison"
+            );
+        }
+
+
         Driver driver = delivery.getDriver();
 
         if (driver == null) {
+
             throw new RuntimeException(
                     "Aucun driver n'est assigné à cette livraison"
             );
         }
+
+
 
         DriverLocation location =
                 driverLocationRepository
@@ -139,8 +163,11 @@ public class DriverLocationService {
                                 )
                         );
 
+
         return driverLocationMapper.toResponse(location);
     }
+
+
 
     public Page<DriverLocationDtoResp> getDriverLocations(
             Long driverId,

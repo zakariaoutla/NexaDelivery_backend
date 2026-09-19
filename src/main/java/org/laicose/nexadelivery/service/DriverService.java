@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.laicose.nexadelivery.configuration.JwtUtil;
 import org.laicose.nexadelivery.dto.response.ProfileUpdateResp;
+import org.laicose.nexadelivery.Enum.DriverStatus;
 
 @Service
 @RequiredArgsConstructor
@@ -121,18 +122,49 @@ public class DriverService {
 
     public DriverDtoResp updateMyStatus(
             String email,
-            DriverDtoReq request) {
+            DriverDtoReq request
+    ) {
 
         Driver driver = driverRepository.findByEmail(email)
                 .orElseThrow(() ->
                         new RuntimeException("Driver introuvable")
                 );
 
-        driver.setDriverStatus(request.getDriverStatus());
+        DriverStatus currentStatus = driver.getDriverStatus();
+        DriverStatus newStatus = request.getDriverStatus();
 
-        Driver updatedDriver = driverRepository.save(driver);
 
-        return driverMapper.toResponseDto(updatedDriver);
+        if (currentStatus == DriverStatus.EN_ATTENTE_ACCEPTATION) {
+            throw new RuntimeException(
+                    "Vous devez accepter ou refuser la livraison avant de modifier votre statut"
+            );
+        }
+
+
+        if (currentStatus == DriverStatus.EN_LIVRAISON) {
+            throw new RuntimeException(
+                    "Impossible de modifier votre statut pendant une livraison"
+            );
+        }
+
+
+        if (newStatus != DriverStatus.DISPONIBLE
+                && newStatus != DriverStatus.HORS_SERVICE) {
+
+            throw new RuntimeException(
+                    "Statut non autorisé"
+            );
+        }
+
+
+        driver.setDriverStatus(newStatus);
+
+        Driver updatedDriver =
+                driverRepository.save(driver);
+
+        return driverMapper.toResponseDto(
+                updatedDriver
+        );
     }
 
 
