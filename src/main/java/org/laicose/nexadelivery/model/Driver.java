@@ -3,7 +3,6 @@ package org.laicose.nexadelivery.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.laicose.nexadelivery.Enum.DriverStatus;
 
@@ -25,10 +24,6 @@ public class Driver extends User {
     @OneToOne
     @JoinColumn(name = "vehicle_id")
     private Vehicle vehicle;
-
-    @ManyToOne
-    @JoinColumn(name = "zone_id")
-    private Zone zone;
 
     @OneToMany(mappedBy = "driver")
     private List<Delivery> deliveries;

@@ -13,5 +13,4 @@ public class CollectionPointDtoResp {
     private Double longitude;
 
     private Long merchantId;
-    private Long zoneId;
 }

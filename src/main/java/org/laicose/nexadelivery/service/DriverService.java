@@ -7,11 +7,9 @@ import org.laicose.nexadelivery.dto.response.DriverDtoResp;
 import org.laicose.nexadelivery.mapper.DriverMapper;
 import org.laicose.nexadelivery.model.Driver;
 import org.laicose.nexadelivery.model.Vehicle;
-import org.laicose.nexadelivery.model.Zone;
 import org.laicose.nexadelivery.repository.DriverRepository;
 import org.laicose.nexadelivery.repository.UserRepository;
 import org.laicose.nexadelivery.repository.VehicleRepository;
-import org.laicose.nexadelivery.repository.ZoneRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -26,7 +24,6 @@ public class DriverService {
     private final DriverRepository driverRepository;
     private final DriverMapper driverMapper;
     private final VehicleRepository vehicleRepository;
-    private final ZoneRepository zoneRepository;
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
 
@@ -199,16 +196,6 @@ public class DriverService {
 
         return driverMapper.toResponseDto(updatedDriver);
 
-    }
-
-    public DriverDtoResp assignZoneToDriver(Long driverId, Long zoneId){
-        Driver driver = driverRepository.findById(driverId).orElseThrow(()-> new RuntimeException("Driver avec l'ID " + driverId + " est introuvable"));
-        Zone zone = zoneRepository.findById(zoneId).orElseThrow(()-> new RuntimeException("Zone avec l'ID " + zoneId + " est introuvable"));
-
-        driver.setZone(zone);
-
-        Driver savedDriver = driverRepository.save(driver);
-        return driverMapper.toResponseDto(savedDriver);
     }
 
 

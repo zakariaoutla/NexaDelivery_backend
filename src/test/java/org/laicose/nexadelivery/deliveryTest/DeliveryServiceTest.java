@@ -4,6 +4,7 @@ package org.laicose.nexadelivery.deliveryTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.laicose.nexadelivery.Enum.DeliveryStatus;
+import org.laicose.nexadelivery.Enum.DriverStatus;
 import org.laicose.nexadelivery.dto.request.DeliveryDtoReq;
 import org.laicose.nexadelivery.dto.request.DeliveryStatusReq;
 import org.laicose.nexadelivery.dto.response.DeliveryDtoResp;
@@ -18,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -69,10 +71,12 @@ class DeliveryServiceTest {
         Delivery savedDelivery = new Delivery();
         savedDelivery.setId(10L);
         savedDelivery.setDeliveryStatus(DeliveryStatus.EN_ATTENTE);
+        savedDelivery.setCollectionPoint(collectionPoint);
 
         DeliveryDtoResp response = new DeliveryDtoResp();
         response.setId(10L);
         response.setDeliveryStatus(DeliveryStatus.EN_ATTENTE);
+        savedDelivery.setCollectionPoint(collectionPoint);
 
         when(merchantRepository.findByEmail(email))
                 .thenReturn(Optional.of(merchant));
@@ -83,8 +87,14 @@ class DeliveryServiceTest {
         when(deliveryMapper.toEntityDto(request))
                 .thenReturn(delivery);
 
-        when(deliveryRepository.save(delivery))
+        when(deliveryRepository.save(any(Delivery.class)))
                 .thenReturn(savedDelivery);
+
+        when(deliveryRepository.findById(savedDelivery.getId()))
+                .thenReturn(Optional.of(savedDelivery));
+
+        when(driverRepository.findByDriverStatus(DriverStatus.DISPONIBLE))
+                .thenReturn(List.of());
 
         when(deliveryMapper.toResponseDto(savedDelivery))
                 .thenReturn(response);

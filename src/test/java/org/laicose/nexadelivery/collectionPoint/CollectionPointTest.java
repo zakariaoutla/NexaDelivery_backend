@@ -7,10 +7,8 @@ import org.laicose.nexadelivery.dto.response.CollectionPointDtoResp;
 import org.laicose.nexadelivery.mapper.CollectionPointMapper;
 import org.laicose.nexadelivery.model.CollectionPoint;
 import org.laicose.nexadelivery.model.Merchant;
-import org.laicose.nexadelivery.model.Zone;
 import org.laicose.nexadelivery.repository.CollectionPointRepository;
 import org.laicose.nexadelivery.repository.MerchantRepository;
-import org.laicose.nexadelivery.repository.ZoneRepository;
 import org.laicose.nexadelivery.service.CollectionPointService;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -33,9 +31,6 @@ class CollectionPointServiceTest {
     @Mock
     private MerchantRepository merchantRepository;
 
-    @Mock
-    private ZoneRepository zoneRepository;
-
     @InjectMocks
     private CollectionPointService collectionPointService;
 
@@ -48,12 +43,8 @@ class CollectionPointServiceTest {
         request.setAddress("Beni Mellal");
         request.setLatitude(32.3373);
         request.setLongitude(-6.3498);
-        request.setZoneId(1L);
 
         Merchant merchant = new Merchant();
-
-        Zone zone = new Zone();
-        zone.setId(1L);
 
         CollectionPoint collectionPoint = new CollectionPoint();
 
@@ -63,20 +54,16 @@ class CollectionPointServiceTest {
         savedCollectionPoint.setLatitude(32.3373);
         savedCollectionPoint.setLongitude(-6.3498);
         savedCollectionPoint.setMerchant(merchant);
-        savedCollectionPoint.setZone(zone);
 
         CollectionPointDtoResp response = new CollectionPointDtoResp();
         response.setId(10L);
         response.setAddress("Beni Mellal");
         response.setLatitude(32.3373);
         response.setLongitude(-6.3498);
-        response.setZoneId(1L);
 
         when(merchantRepository.findByEmail(email))
                 .thenReturn(Optional.of(merchant));
 
-        when(zoneRepository.findById(1L))
-                .thenReturn(Optional.of(zone));
 
         when(collectionPointMapper.toEntity(request))
                 .thenReturn(collectionPoint);
@@ -93,10 +80,8 @@ class CollectionPointServiceTest {
         assertNotNull(result);
         assertEquals(10L, result.getId());
         assertEquals("Beni Mellal", result.getAddress());
-        assertEquals(1L, result.getZoneId());
 
         verify(merchantRepository).findByEmail(email);
-        verify(zoneRepository).findById(1L);
         verify(collectionPointRepository).save(collectionPoint);
         verify(collectionPointMapper).toResponse(savedCollectionPoint);
     }

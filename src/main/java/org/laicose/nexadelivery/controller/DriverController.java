@@ -111,10 +111,4 @@ public class DriverController {
         return ResponseEntity.ok(driverService.assignVehicleToDriver(driverId, vehicleId));
     }
 
-    @PutMapping("/{driverId}/zone/{zoneId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<DriverDtoResp> assignZoneToDriver(@PathVariable Long driverId, @PathVariable Long zoneId){
-        return ResponseEntity.ok(driverService.assignZoneToDriver(driverId, zoneId));
-    }
-
 }

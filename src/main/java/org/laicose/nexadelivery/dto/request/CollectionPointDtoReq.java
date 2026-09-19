@@ -18,7 +18,4 @@ public class CollectionPointDtoReq {
 
     @NotNull(message = "La longitude est obligatoire")
     private Double longitude;
-
-    @NotNull(message = "La zone est obligatoire")
-    private Long zoneId;
 }

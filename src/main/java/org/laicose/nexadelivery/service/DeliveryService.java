@@ -487,11 +487,9 @@ public class DeliveryService {
             );
         }
 
-        Zone zone = collectionPoint.getZone();
-
         List<Driver> availableDrivers =
-                driverRepository.findByZoneAndDriverStatus(
-                        zone,
+                driverRepository
+                        .findByDriverStatus(
                         DriverStatus.DISPONIBLE
                 );
 
@@ -639,36 +637,88 @@ public class DeliveryService {
             return;
         }
 
-        if (driver.getZone() == null) {
+        Optional<DriverLocation> locationOptional =
+                driverLocationRepository
+                        .findFirstByDriverOrderByTimestampDesc(driver);
+
+        if (locationOptional.isEmpty()) {
             return;
         }
 
-        Optional<Delivery> waitingDelivery =
+        DriverLocation driverLocation =
+                locationOptional.get();
+
+
+        List<Delivery> waitingDeliveries =
                 deliveryRepository
-                        .findByCollectionPointZoneAndDeliveryStatusOrderByCreatedAtAsc(
-                                driver.getZone(),
+                        .findByDeliveryStatus(
                                 DeliveryStatus.EN_ATTENTE
                         );
 
-        if (waitingDelivery.isEmpty()) {
+
+        if (waitingDeliveries.isEmpty()) {
             return;
         }
 
-        Delivery delivery = waitingDelivery.get();
 
-        delivery.setDriver(driver);
-        delivery.setDeliveryStatus(
+        Delivery nearestDelivery = null;
+        double minimumDistance =
+                Double.MAX_VALUE;
+
+
+        for (Delivery delivery : waitingDeliveries) {
+
+            CollectionPoint collectionPoint =
+                    delivery.getCollectionPoint();
+
+            if (collectionPoint == null
+                    || collectionPoint.getLatitude() == null
+                    || collectionPoint.getLongitude() == null) {
+                continue;
+            }
+
+
+            double distance =
+                    calculateDistance(
+                            driverLocation.getLatitude(),
+                            driverLocation.getLongitude(),
+                            collectionPoint.getLatitude(),
+                            collectionPoint.getLongitude()
+                    );
+
+
+            if (distance < minimumDistance) {
+
+                minimumDistance = distance;
+                nearestDelivery = delivery;
+            }
+        }
+
+
+        if (nearestDelivery == null) {
+            return;
+        }
+
+
+        nearestDelivery.setDriver(driver);
+
+        nearestDelivery.setDeliveryStatus(
                 DeliveryStatus.ASSIGNEE
         );
+
 
         driver.setDriverStatus(
                 DriverStatus.EN_ATTENTE_ACCEPTATION
         );
 
+
         driverRepository.save(driver);
 
         Delivery savedDelivery =
-                deliveryRepository.save(delivery);
+                deliveryRepository.save(
+                        nearestDelivery
+                );
+
 
         notificationService.createNotification(
                 driver,

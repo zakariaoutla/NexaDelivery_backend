@@ -9,7 +9,6 @@ import org.laicose.nexadelivery.mapper.DriverMapper;
 import org.laicose.nexadelivery.model.Driver;
 import org.laicose.nexadelivery.repository.DriverRepository;
 import org.laicose.nexadelivery.repository.VehicleRepository;
-import org.laicose.nexadelivery.repository.ZoneRepository;
 import org.laicose.nexadelivery.service.DriverService;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -29,11 +28,7 @@ class DriverServiceTest {
     @Mock
     private DriverMapper driverMapper;
 
-    @Mock
-    private VehicleRepository vehicleRepository;
 
-    @Mock
-    private ZoneRepository zoneRepository;
 
     @InjectMocks
     private DriverService driverService;

@@ -16,4 +16,6 @@ public interface DriverLocationRepository extends JpaRepository<DriverLocation, 
     );
 
     Optional<DriverLocation> findFirstByDriverOrderByTimestampDesc(Driver driver);
+
+
 }

@@ -4,7 +4,6 @@ package org.laicose.nexadelivery.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Entity
@@ -24,8 +23,4 @@ public class CollectionPoint {
     @ManyToOne
     @JoinColumn(name = "merchant_id", nullable = false)
     private Merchant merchant;
-
-    @ManyToOne
-    @JoinColumn(name = "zone_id", nullable = false)
-    private Zone zone;
 }

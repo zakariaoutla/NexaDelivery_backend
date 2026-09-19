@@ -17,8 +17,6 @@ public class DriverDtoResp {
     private double averageRating;
     private Long vehicleId;
     private VehicleType vehicleType;
-    private Long zoneId;
-    private String zoneName;
 
 
 }
