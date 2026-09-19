@@ -61,6 +61,7 @@ public class DeliveryService {
         return deliveryMapper.toResponseDto(delivery);
     }
 
+    @Transactional
     public DeliveryDtoResp createDelivery(
             String email,
             DeliveryDtoReq deliveryDtoReq
@@ -84,14 +85,20 @@ public class DeliveryService {
                         )
                 );
 
-        Delivery delivery = deliveryMapper.toEntityDto(deliveryDtoReq);
+        Delivery delivery =
+                deliveryMapper.toEntityDto(deliveryDtoReq);
 
         delivery.setCollectionPoint(collectionPoint);
 
-        delivery.setPickupAddress(collectionPoint.getAddress());
+        delivery.setPickupAddress(
+                collectionPoint.getAddress()
+        );
 
         delivery.setMerchant(merchant);
-        delivery.setCreatedAt(LocalDateTime.now());
+
+        delivery.setCreatedAt(
+                LocalDateTime.now()
+        );
 
         delivery.setTrackingCode(
                 "NX-" +
@@ -101,11 +108,16 @@ public class DeliveryService {
                                 .toUpperCase()
         );
 
-        delivery.setDeliveryStatus(DeliveryStatus.EN_ATTENTE);
+        delivery.setDeliveryStatus(
+                DeliveryStatus.EN_ATTENTE
+        );
 
-        Delivery savedDelivery = deliveryRepository.save(delivery);
+        Delivery savedDelivery =
+                deliveryRepository.save(delivery);
 
-        return deliveryMapper.toResponseDto(savedDelivery);
+        return autoAssignDriver(
+                savedDelivery.getId()
+        );
     }
 
 
@@ -407,7 +419,6 @@ public class DeliveryService {
     }
 
 
-
     @Transactional
     public DeliveryDtoResp autoAssignDriver(Long deliveryId) {
 
@@ -424,7 +435,8 @@ public class DeliveryService {
             );
         }
 
-        CollectionPoint collectionPoint = delivery.getCollectionPoint();
+        CollectionPoint collectionPoint =
+                delivery.getCollectionPoint();
 
         if (collectionPoint == null) {
             throw new RuntimeException(
@@ -440,14 +452,15 @@ public class DeliveryService {
                         DriverStatus.DISPONIBLE
                 );
 
+        
         if (availableDrivers.isEmpty()) {
-            throw new RuntimeException(
-                    "Aucun driver disponible dans cette zone"
-            );
+            return deliveryMapper.toResponseDto(delivery);
         }
+
 
         Driver nearestDriver = null;
         double minimumDistance = Double.MAX_VALUE;
+
 
         for (Driver driver : availableDrivers) {
 
@@ -455,11 +468,13 @@ public class DeliveryService {
                     driverLocationRepository
                             .findFirstByDriverOrderByTimestampDesc(driver);
 
+
             if (locationOptional.isEmpty()) {
                 continue;
             }
 
-            DriverLocation location = locationOptional.get();
+            DriverLocation location =
+                    locationOptional.get();
 
             double distance = calculateDistance(
                     collectionPoint.getLatitude(),
@@ -468,27 +483,36 @@ public class DeliveryService {
                     location.getLongitude()
             );
 
+
             if (distance < minimumDistance) {
+
                 minimumDistance = distance;
+
                 nearestDriver = driver;
             }
         }
 
+
         if (nearestDriver == null) {
-            throw new RuntimeException(
-                    "Aucun driver disponible avec une position GPS connue"
-            );
+            return deliveryMapper.toResponseDto(delivery);
         }
 
-        delivery.setDriver(nearestDriver);
-        delivery.setDeliveryStatus(DeliveryStatus.ASSIGNEE);
 
-        nearestDriver.setDriverStatus(DriverStatus.EN_LIVRAISON);
+        delivery.setDriver(nearestDriver);
+
+        delivery.setDeliveryStatus(
+                DeliveryStatus.ASSIGNEE
+        );
+
+        nearestDriver.setDriverStatus(
+                DriverStatus.EN_LIVRAISON
+        );
 
         driverRepository.save(nearestDriver);
 
         Delivery savedDelivery =
                 deliveryRepository.save(delivery);
+
 
         notificationService.createNotification(
                 nearestDriver,
@@ -496,8 +520,12 @@ public class DeliveryService {
                 "Une nouvelle livraison vous a été assignée"
         );
 
-        return deliveryMapper.toResponseDto(savedDelivery);
+
+        return deliveryMapper.toResponseDto(
+                savedDelivery
+        );
     }
+
 
     public void deleteDelivery(Long id) {
 
