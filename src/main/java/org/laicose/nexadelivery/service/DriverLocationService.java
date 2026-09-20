@@ -238,6 +238,16 @@ public class DriverLocationService {
         return driverLocationMapper.toResponse(location);
     }
 
+    public List<DriverLocationDtoResp> getLatestLocationsForAllDrivers() {
+
+        List<DriverLocation> locations =
+                driverLocationRepository.findLatestLocationForEachDriver();
+
+        return locations.stream()
+                .map(driverLocationMapper::toResponse)
+                .toList();
+    }
+
     public void deleteLocation(Long id) {
 
         DriverLocation driverLocation =

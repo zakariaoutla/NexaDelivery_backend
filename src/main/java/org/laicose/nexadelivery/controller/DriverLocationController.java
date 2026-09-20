@@ -13,6 +13,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/driver-location")
 @RequiredArgsConstructor
@@ -104,6 +106,16 @@ public class DriverLocationController {
 
         return ResponseEntity.ok(
                 driverLocationService.getLatestDriverLocation(driverId)
+        );
+    }
+
+
+    @GetMapping("/latest")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<DriverLocationDtoResp>> getLatestLocationsForAllDrivers() {
+
+        return ResponseEntity.ok(
+                driverLocationService.getLatestLocationsForAllDrivers()
         );
     }
 
