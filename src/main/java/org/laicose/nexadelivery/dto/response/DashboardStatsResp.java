@@ -12,15 +12,19 @@ import lombok.Setter;
 public class DashboardStatsResp {
 
     private long totalDeliveries;
+
     private long pendingDeliveries;
     private long assignedDeliveries;
+    private long acceptedDeliveries;
+    private long pickedUpDeliveries;
     private long inRouteDeliveries;
     private long deliveredDeliveries;
     private long cancelledDeliveries;
+
+    private long activeDeliveries;
 
     private long totalDrivers;
     private long availableDrivers;
 
     private long totalMerchants;
-    private long pickedUpDeliveries;
 }

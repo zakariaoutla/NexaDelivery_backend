@@ -49,6 +49,12 @@ public class StatisticsService {
                 )
         );
 
+        stats.setAcceptedDeliveries(
+                deliveryRepository.countByDeliveryStatus(
+                        DeliveryStatus.ACCEPTEE
+                )
+        );
+
 
         stats.setPickedUpDeliveries(
                 deliveryRepository.countByDeliveryStatus(
@@ -75,6 +81,13 @@ public class StatisticsService {
                 deliveryRepository.countByDeliveryStatus(
                         DeliveryStatus.ANNULEE
                 )
+        );
+
+        stats.setActiveDeliveries(
+                stats.getAssignedDeliveries()
+                        + stats.getAcceptedDeliveries()
+                        + stats.getPickedUpDeliveries()
+                        + stats.getInRouteDeliveries()
         );
 
 
