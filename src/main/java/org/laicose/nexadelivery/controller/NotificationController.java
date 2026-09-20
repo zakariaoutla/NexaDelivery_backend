@@ -47,4 +47,16 @@ public class NotificationController {
                 )
         );
     }
+
+    @GetMapping("/me/unread-count")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MERCHANT', 'DRIVER')")
+    public ResponseEntity<Long> getMyUnreadCount(
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        return ResponseEntity.ok(
+                notificationService.getMyUnreadCount(
+                        userDetails.getUsername()
+                )
+        );
+    }
 }

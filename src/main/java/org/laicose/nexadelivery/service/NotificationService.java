@@ -100,4 +100,16 @@ public class NotificationService {
 
         return notificationMapper.toResponse(updatedNotification);
     }
+
+    public long getMyUnreadCount(String email) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new RuntimeException("Utilisateur introuvable")
+                );
+
+        return notificationRepository
+                .countByUserAndReadFalse(user);
+    }
+
 }
