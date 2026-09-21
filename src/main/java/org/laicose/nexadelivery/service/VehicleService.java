@@ -45,6 +45,14 @@ public class VehicleService {
         return vehicleMapper.toResponse(updatedVehicle);
     }
 
+    public Page<VehicleDtoResp> getAvailableVehicles(
+            Pageable pageable
+    ) {
+        return vehicleRepository
+                .findAvailableVehicles(pageable)
+                .map(vehicleMapper::toResponse);
+    }
+
     public void deleteVehicle(Long id){
         Vehicle vehicle = vehicleRepository.findById(id).orElseThrow(()->new RuntimeException("Vehicle avec l'ID " + id + " est introuvable"));
 

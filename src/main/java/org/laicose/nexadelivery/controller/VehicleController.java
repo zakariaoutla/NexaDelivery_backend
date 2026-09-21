@@ -47,6 +47,25 @@ public class VehicleController {
         return ResponseEntity.ok(vehicleService.updateVehicle(id, vehicleDtoReq));
     }
 
+    @GetMapping("/available")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Page<VehicleDtoResp>> getAvailableVehicles(
+            @ParameterObject
+            @PageableDefault(
+                    page = 0,
+                    size = 100,
+                    sort = "id",
+                    direction = Sort.Direction.ASC
+            )
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(
+                vehicleService.getAvailableVehicles(
+                        pageable
+                )
+        );
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteVehicle(@PathVariable Long id){
