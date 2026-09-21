@@ -2,6 +2,7 @@ package org.laicose.nexadelivery.controller;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
+import org.laicose.nexadelivery.Enum.DriverStatus;
 import org.laicose.nexadelivery.dto.request.DriverDtoReq;
 import org.laicose.nexadelivery.dto.request.DriverRegister;
 import org.laicose.nexadelivery.dto.request.DriverUpdateReq;
@@ -33,10 +34,28 @@ public class DriverController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<DriverDtoResp>> findAllDriver(@ParameterObject @PageableDefault(page = 0, size = 10, direction = Sort.Direction.ASC)Pageable pageable){
-        return ResponseEntity.ok(driverService.getAllDriver(pageable));
+    public ResponseEntity<Page<DriverDtoResp>> findAllDriver(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) DriverStatus status,
+            @ParameterObject
+            @PageableDefault(
+                    page = 0,
+                    size = 10,
+                    sort = "name",
+                    direction = Sort.Direction.ASC
+            )
+            Pageable pageable
+    ) {
 
+        return ResponseEntity.ok(
+                driverService.getAllDriver(
+                        search,
+                        status,
+                        pageable
+                )
+        );
     }
+
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DriverDtoResp> findById(@PathVariable long id){

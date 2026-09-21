@@ -28,9 +28,24 @@ public class DriverService {
     private final JwtUtil jwtUtil;
 
 
-    public Page<DriverDtoResp> getAllDriver(Pageable pageable){
-        Page<Driver> drivers = driverRepository.findAll(pageable);
-        return drivers.map(driverMapper::toResponseDto);
+    public Page<DriverDtoResp> getAllDriver(
+            String search,
+            DriverStatus status,
+            Pageable pageable
+    ) {
+
+        String normalizedSearch =
+                search == null || search.isBlank()
+                        ? null
+                        : search.trim();
+
+        return driverRepository
+                .searchDrivers(
+                        normalizedSearch,
+                        status,
+                        pageable
+                )
+                .map(driverMapper::toResponseDto);
     }
 
     public DriverDtoResp getDriverById(Long id){
