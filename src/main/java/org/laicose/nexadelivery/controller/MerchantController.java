@@ -32,8 +32,24 @@ public class MerchantController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<MerchantDtoResp>> findAllMerchant(@ParameterObject @PageableDefault(page = 0,size = 10, direction = Sort.Direction.ASC)Pageable pageable){
-        return ResponseEntity.ok(merchantService.getAllMerchant(pageable));
+    public ResponseEntity<Page<MerchantDtoResp>> findAllMerchant(
+            @RequestParam(required = false) String search,
+            @ParameterObject
+            @PageableDefault(
+                    page = 0,
+                    size = 10,
+                    sort = "name",
+                    direction = Sort.Direction.ASC
+            )
+            Pageable pageable
+    ) {
+
+        return ResponseEntity.ok(
+                merchantService.getAllMerchant(
+                        search,
+                        pageable
+                )
+        );
     }
 
     @GetMapping("/{id}")

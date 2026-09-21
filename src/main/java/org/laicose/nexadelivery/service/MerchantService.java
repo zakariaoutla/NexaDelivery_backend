@@ -23,9 +23,22 @@ public class MerchantService {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
 
-    public Page<MerchantDtoResp> getAllMerchant(Pageable pageable){
-        Page<Merchant> merchants = merchantRepository.findAll(pageable);
-       return merchants.map(merchantMapper::toResponseDto);
+    public Page<MerchantDtoResp> getAllMerchant(
+            String search,
+            Pageable pageable
+    ) {
+
+        String normalizedSearch =
+                search == null || search.isBlank()
+                        ? null
+                        : search.trim();
+
+        return merchantRepository
+                .searchMerchants(
+                        normalizedSearch,
+                        pageable
+                )
+                .map(merchantMapper::toResponseDto);
     }
 
     public MerchantDtoResp getMerchantById(Long id){
