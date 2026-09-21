@@ -20,6 +20,8 @@ public class DeliveryDtoResp {
     private String clientPhone;
     private LocalDateTime createdAt;
     private Long driverId;
+    private String driverName;
     private Long merchantId;
+    private String businessName;
     private Long collectionPointId;
 }

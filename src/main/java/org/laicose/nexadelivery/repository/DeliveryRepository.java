@@ -7,6 +7,8 @@ import org.laicose.nexadelivery.model.Merchant;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -55,6 +57,32 @@ public interface DeliveryRepository extends JpaRepository<Delivery, Long> {
 
     List<Delivery> findByDeliveryStatus(
             DeliveryStatus deliveryStatus
+    );
+
+    @Query("""
+    SELECT d
+    FROM Delivery d
+    LEFT JOIN d.driver dr
+    LEFT JOIN d.merchant m
+    WHERE
+        (
+            :search IS NULL
+            OR LOWER(d.trackingCode) LIKE LOWER(CONCAT('%', :search, '%'))
+            OR LOWER(d.clientName) LIKE LOWER(CONCAT('%', :search, '%'))
+            OR LOWER(d.dropAddress) LIKE LOWER(CONCAT('%', :search, '%'))
+            OR LOWER(dr.name) LIKE LOWER(CONCAT('%', :search, '%'))
+            OR LOWER(m.businessName) LIKE LOWER(CONCAT('%', :search, '%'))
+        )
+        AND
+        (
+            :status IS NULL
+            OR d.deliveryStatus = :status
+        )
+    """)
+    Page<Delivery> searchDeliveries(
+            @Param("search") String search,
+            @Param("status") DeliveryStatus status,
+            Pageable pageable
     );
 
 }

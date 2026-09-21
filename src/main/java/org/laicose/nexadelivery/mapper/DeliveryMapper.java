@@ -22,7 +22,9 @@ public interface DeliveryMapper {
        Delivery toEntityDto(DeliveryDtoReq deliveryDtoReq);
 
        @Mapping(source = "driver.id", target = "driverId")
+       @Mapping(source = "driver.name", target = "driverName")
        @Mapping(source = "merchant.id", target = "merchantId")
+       @Mapping(source = "merchant.businessName", target = "businessName")
        @Mapping(source = "collectionPoint.id", target = "collectionPointId")
        DeliveryDtoResp toResponseDto(Delivery delivery);
 

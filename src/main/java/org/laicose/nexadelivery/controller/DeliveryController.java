@@ -30,10 +30,31 @@ public class DeliveryController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<DeliveryDtoResp>> getAllDelivery(@ParameterObject @PageableDefault(page = 0, size = 10, direction = Sort.Direction.ASC)Pageable pageable){
-        return ResponseEntity.ok(deliveryService.findAllDelivery(pageable));
+    public ResponseEntity<Page<DeliveryDtoResp>> getAllDelivery(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) DeliveryStatus status,
 
+            @ParameterObject
+            @PageableDefault(
+                    page = 0,
+                    size = 10,
+                    sort = "createdAt",
+                    direction = Sort.Direction.DESC
+            )
+            Pageable pageable
+    ) {
+
+        return ResponseEntity.ok(
+                deliveryService.findAllDelivery(
+                        search,
+                        status,
+                        pageable
+                )
+        );
     }
+
+
+
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DeliveryDtoResp> getDeliveryById(@PathVariable Long id){

@@ -32,9 +32,24 @@ public class DeliveryService {
     private final NotificationService notificationService;
 
 
-    public Page<DeliveryDtoResp> findAllDelivery(Pageable pageable){
-        Page<Delivery> merchants = deliveryRepository.findAll(pageable);
-        return merchants.map(deliveryMapper::toResponseDto);
+    public Page<DeliveryDtoResp> findAllDelivery(
+            String search,
+            DeliveryStatus status,
+            Pageable pageable
+    ) {
+
+        String normalizedSearch =
+                search == null || search.isBlank()
+                        ? null
+                        : search.trim();
+
+        return deliveryRepository
+                .searchDeliveries(
+                        normalizedSearch,
+                        status,
+                        pageable
+                )
+                .map(deliveryMapper::toResponseDto);
     }
     public DeliveryDtoResp findDeliveryById(Long id){
         Delivery delivery = deliveryRepository.findById(id).orElseThrow(()->new RuntimeException("Merchant avec l'ID " + id + " est introuvable"));
