@@ -94,14 +94,6 @@ public class DriverController {
         );
     }
 
-
-
-    @PutMapping("/{id}/status")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<DriverDtoResp> updateDriverStatus(@PathVariable long id,@Valid @RequestBody DriverDtoReq driverDtoReq){
-     return ResponseEntity.ok(driverService.updateDriverStatus(id, driverDtoReq));
-    }
-
     @PutMapping("/me/status")
     @PreAuthorize("hasRole('DRIVER')")
     public ResponseEntity<DriverDtoResp> updateMyStatus(
@@ -128,6 +120,20 @@ public class DriverController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DriverDtoResp> assignVehicleToDriver(@PathVariable Long driverId, @PathVariable Long vehicleId ){
         return ResponseEntity.ok(driverService.assignVehicleToDriver(driverId, vehicleId));
+    }
+
+
+    @DeleteMapping("/{driverId}/vehicle")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<DriverDtoResp> removeVehicleFromDriver(
+            @PathVariable Long driverId
+    ) {
+
+        return ResponseEntity.ok(
+                driverService.removeVehicleFromDriver(
+                        driverId
+                )
+        );
     }
 
 }

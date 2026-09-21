@@ -32,50 +32,7 @@ class DriverServiceTest {
 
     @InjectMocks
     private DriverService driverService;
-
-    @Test
-    void updateDriverStatusTest() {
-
-        Long driverId = 1L;
-
-        DriverDtoReq request = new DriverDtoReq();
-        request.setDriverStatus(DriverStatus.DISPONIBLE);
-
-        Driver driver = new Driver();
-        driver.setId(driverId);
-        driver.setDriverStatus(DriverStatus.HORS_SERVICE);
-
-        Driver updatedDriver = new Driver();
-        updatedDriver.setId(driverId);
-        updatedDriver.setDriverStatus(DriverStatus.DISPONIBLE);
-
-        DriverDtoResp response = new DriverDtoResp();
-        response.setId(driverId);
-        response.setDriverStatus(DriverStatus.DISPONIBLE);
-
-        when(driverRepository.findById(driverId))
-                .thenReturn(Optional.of(driver));
-
-        when(driverRepository.save(driver))
-                .thenReturn(updatedDriver);
-
-        when(driverMapper.toResponseDto(updatedDriver))
-                .thenReturn(response);
-
-        DriverDtoResp result =
-                driverService.updateDriverStatus(driverId, request);
-
-        assertNotNull(result);
-        assertEquals(driverId, result.getId());
-        assertEquals(
-                DriverStatus.DISPONIBLE,
-                result.getDriverStatus()
-        );
-
-        verify(driverRepository).findById(driverId);
-        verify(driverRepository).save(driver);
-        verify(driverMapper).toResponseDto(updatedDriver);
-    }
+    
 
     @Test
     void getDriverByIdTest() {

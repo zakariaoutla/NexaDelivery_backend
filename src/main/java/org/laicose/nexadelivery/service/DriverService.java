@@ -124,14 +124,6 @@ public class DriverService {
         );
     }
 
-    public DriverDtoResp updateDriverStatus(Long id, DriverDtoReq driverDtoReq){
-        Driver driver = driverRepository.findById(id).orElseThrow(()->new RuntimeException("Driver avec l'ID " + id + " est introuvable"));
-
-        driver.setDriverStatus(driverDtoReq.getDriverStatus());
-        Driver updateDriver = driverRepository.save(driver);
-        return driverMapper.toResponseDto(updateDriver);
-    }
-
     public DriverDtoResp updateMyStatus(
             String email,
             DriverDtoReq request
@@ -211,6 +203,26 @@ public class DriverService {
 
         return driverMapper.toResponseDto(updatedDriver);
 
+    }
+
+
+    public DriverDtoResp removeVehicleFromDriver(Long driverId) {
+
+        Driver driver = driverRepository.findById(driverId)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Chauffeur introuvable"
+                        )
+                );
+
+        driver.setVehicle(null);
+
+        Driver updatedDriver =
+                driverRepository.save(driver);
+
+        return driverMapper.toResponseDto(
+                updatedDriver
+        );
     }
 
 
