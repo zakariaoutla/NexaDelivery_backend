@@ -6,6 +6,7 @@ import org.laicose.nexadelivery.Enum.DriverStatus;
 import org.laicose.nexadelivery.dto.request.DeliveryDtoReq;
 import org.laicose.nexadelivery.dto.request.DeliveryStatusReq;
 import org.laicose.nexadelivery.dto.response.DeliveryDtoResp;
+import org.laicose.nexadelivery.dto.response.PublicTrackingDto;
 import org.laicose.nexadelivery.mapper.DeliveryMapper;
 import org.laicose.nexadelivery.model.*;
 import org.laicose.nexadelivery.repository.*;
@@ -762,6 +763,41 @@ public class DeliveryService {
                     "Vous n'êtes pas autorisé à supprimer cette livraison"
             );
         }
+    }
+
+
+    public PublicTrackingDto trackDelivery(String trackingCode) {
+
+        Delivery delivery = deliveryRepository
+                .findByTrackingCode(trackingCode)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Aucune livraison trouvée avec le code " + trackingCode
+                        )
+                );
+
+        PublicTrackingDto tracking = new PublicTrackingDto();
+
+        tracking.setTrackingCode(delivery.getTrackingCode());
+        tracking.setDeliveryStatus(delivery.getDeliveryStatus());
+        tracking.setPickupAddress(delivery.getPickupAddress());
+        tracking.setDropAddress(delivery.getDropAddress());
+        tracking.setDescription(delivery.getDescription());
+        tracking.setCreatedAt(delivery.getCreatedAt());
+
+        if (delivery.getMerchant() != null) {
+            tracking.setMerchantName(
+                    delivery.getMerchant().getBusinessName()
+            );
+        }
+
+        if (delivery.getDriver() != null) {
+            tracking.setDriverName(
+                    delivery.getDriver().getName()
+            );
+        }
+
+        return tracking;
     }
 
 
