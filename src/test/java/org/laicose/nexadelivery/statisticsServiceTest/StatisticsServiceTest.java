@@ -39,6 +39,9 @@ class StatisticsServiceTest {
         when(deliveryRepository.countByDeliveryStatus(DeliveryStatus.EN_ATTENTE))
                 .thenReturn(2L);
 
+        when(deliveryRepository.countByDeliveryStatus(DeliveryStatus.ACCEPTEE))
+                .thenReturn(1L);
+
         when(deliveryRepository.countByDeliveryStatus(DeliveryStatus.ASSIGNEE))
                 .thenReturn(1L);
 
