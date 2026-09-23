@@ -14,13 +14,14 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: Zakaria@741
+          MYSQL_ROOT_PASSWORD: "Zakaria@741"
           MYSQL_DATABASE: nexadelivery_db
         options: >-
-          --health-cmd="mysqladmin ping -h localhost"
+          --health-cmd="mysqladmin ping --protocol=tcp -h 127.0.0.1 --silent"
+          --health-start-period=60s
           --health-interval=10s
           --health-timeout=5s
-          --health-retries=3
+          --health-retries=12
         ports:
           - 3306:3306
 
@@ -31,16 +32,16 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: 'maven'
+          java-version: "17"
+          distribution: "temurin"
+          cache: "maven"
 
       - name: Run Tests
         run: mvn test
         env:
           SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/nexadelivery_db
           SPRING_DATASOURCE_USERNAME: root
-          SPRING_DATASOURCE_PASSWORD: Zakaria@741
+          SPRING_DATASOURCE_PASSWORD: "Zakaria@741"
           SPRING_JPA_HIBERNATE_DDL_AUTO: update
           SPRING_FLYWAY_ENABLED: true
 

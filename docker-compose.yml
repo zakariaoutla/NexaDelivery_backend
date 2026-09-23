@@ -35,7 +35,7 @@ services:
     container_name: mysql_db
     restart: always
     ports:
-      - "3307:3306"
+      - "3306:3306"
     environment:
       MYSQL_DATABASE: nexadelivery_db
       MYSQL_ROOT_PASSWORD: Zakaria@741
