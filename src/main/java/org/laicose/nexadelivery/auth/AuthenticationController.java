@@ -10,6 +10,7 @@ import org.laicose.nexadelivery.dto.request.UserLogin;
 import org.laicose.nexadelivery.dto.request.DriverRegister;
 import org.laicose.nexadelivery.model.Driver;
 import org.laicose.nexadelivery.model.Merchant;
+import org.laicose.nexadelivery.model.User;
 import org.laicose.nexadelivery.repository.DriverRepository;
 import org.laicose.nexadelivery.repository.MerchantRepository;
 import org.laicose.nexadelivery.repository.UserRepository;
@@ -97,6 +98,5 @@ public class AuthenticationController {
 
         return ResponseEntity.ok("User registered successfully");
     }
-
 
 }
