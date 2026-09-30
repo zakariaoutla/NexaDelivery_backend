@@ -507,9 +507,6 @@ mvn package -DskipTests
 
 ## Diagramme de classes
 
-Le dépôt contient le diagramme de classes du projet :
-
-
 
 ![Diagram de class.jpg](Diagram%20de%20class.jpg)
 
