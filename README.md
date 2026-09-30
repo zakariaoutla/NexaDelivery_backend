@@ -509,9 +509,7 @@ mvn package -DskipTests
 
 Le dépôt contient le diagramme de classes du projet :
 
-``` md
-![Diagramme de classes](Diagram%20de%20class.jpg)
-```
+
 
 ![Diagram de class.jpg](Diagram%20de%20class.jpg)
 
@@ -519,9 +517,7 @@ Le dépôt contient le diagramme de classes du projet :
 
 ## Diagramme de cas d'utilisation
 
-``` md
-![Diagramme de cas d'utilisation](UseCaseDiagram.jpg)
-```
+
 
 ![UseCaseDiagram.jpg](UseCaseDiagram.jpg)
 
@@ -529,9 +525,6 @@ Le dépôt contient le diagramme de classes du projet :
 
 ## Diagramme de séquence
 
-``` md
-![Diagramme de séquence](GET%20%E2%80%94%20Consulter%20ses%20livraisons.jpg)
-```
 
 ![GET — Consulter ses livraisons.jpg](GET%20%E2%80%94%20Consulter%20ses%20livraisons.jpg)
 
